@@ -34,15 +34,3 @@ class Discount:
             raise TypeError("amount deve ser um valor numérico.")
         if self.amount < 0:
             raise ValueError("amount do desconto não pode ser negativo.")
-
-    @classmethod
-    def for_product(
-        cls, product: Product, description: str, amount: float
-    ) -> "Discount":
-        """Cria um desconto associado a um único produto."""
-        return cls(products=(product,), description=description, amount=amount)
-
-    @property
-    def primary_product(self) -> Product:
-        """Retorna o primeiro produto associado ao desconto."""
-        return self.products[0]
