@@ -28,9 +28,7 @@ class Discount:
             )
         if not isinstance(self.description, str) or not self.description.strip():
             raise ValueError("description deve ser uma string não vazia.")
-        if isinstance(self.amount, bool) or not isinstance(
-            self.amount, (int, float)
-        ):
+        if type(self.amount) not in (int, float):
             raise TypeError("amount deve ser um valor numérico.")
         if self.amount < 0:
             raise ValueError("amount do desconto não pode ser negativo.")

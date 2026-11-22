@@ -16,9 +16,7 @@ class ReceiptItem:
 
     def __post_init__(self) -> None:
         validate_product_quantity(self.product, self.quantity)
-        if isinstance(self.unit_price, bool) or not isinstance(
-            self.unit_price, (int, float)
-        ):
+        if type(self.unit_price) not in (int, float):
             raise TypeError("unit_price deve ser um valor numérico.")
         if self.unit_price < 0:
             raise ValueError("unit_price não pode ser negativo.")

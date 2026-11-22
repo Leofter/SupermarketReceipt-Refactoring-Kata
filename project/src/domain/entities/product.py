@@ -29,7 +29,7 @@ def validate_product_quantity(product: Product, quantity: float) -> None:
     """Valida se o produto e a quantidade respeitam as invariantes de domínio."""
     if not isinstance(product, Product):
         raise TypeError("product deve ser uma instância de Product.")
-    if isinstance(quantity, bool) or not isinstance(quantity, (int, float)):
+    if type(quantity) not in (int, float):
         raise TypeError("quantity deve ser um valor numérico.")
     if quantity <= 0:
         raise ValueError("quantity deve ser maior que zero.")
