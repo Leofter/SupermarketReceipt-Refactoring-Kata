@@ -6,7 +6,12 @@ from src.aplication.dto.output.discount_output_dto import DiscountOutputDTO
 from src.aplication.dto.output.receipt_item_output_dto import (
     ReceiptItemOutputDTO,
 )
+from src.aplication.service.strategies.combo_discount_strategy import (
+    ComboDiscountStrategy,
+)
+from src.domain.entities.product import Product
 from src.domain.entities.receipt import Receipt
+from src.domain.entities.shopping_cart import ShoppingCart
 from src.domain.interfaces.catalog import PriceCatalog
 from src.domain.interfaces.offer_gateway import IOfferGateway
 
@@ -28,14 +33,38 @@ class CheckoutUseCase:
             unit_price = self._catalog.unit_price(item.product)
             receipt.add_product(item.product, item.quantity, unit_price)
 
-        for strategy in self._offer_gateway.list_active_offers():
+        strategies = sorted(
+            self._offer_gateway.list_active_offers(),
+            key=lambda s: isinstance(s, ComboDiscountStrategy),
+        )
+        remaining = input_dto.cart.product_quantities()
+
+        for strategy in strategies:
+            remaining_cart = self._build_remaining_cart(remaining)
             discount = strategy.calculate_discount(
-                input_dto.cart, self._catalog
+                remaining_cart, self._catalog
             )
             if discount is not None:
                 receipt.add_discount(discount)
+                for product, used in strategy.consumed_quantities(
+                    remaining_cart
+                ).items():
+                    remaining[product] = max(
+                        0.0, remaining.get(product, 0.0) - used
+                    )
 
         return self._build_output(receipt)
+
+    @staticmethod
+    def _build_remaining_cart(
+        remaining: dict[Product, float],
+    ) -> ShoppingCart:
+        """Monta um carrinho temporário apenas com itens ainda não consumidos."""
+        cart = ShoppingCart()
+        for product, qty in remaining.items():
+            if qty > 0:
+                cart.add_item_quantity(product, qty)
+        return cart
 
     @staticmethod
     def _build_output(receipt: Receipt) -> CheckoutOutputDTO:

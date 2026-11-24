@@ -32,3 +32,8 @@ class PercentageDiscountStrategy(DiscountStrategy):
             description=f"{self._percentage}% off",
             amount=discount_amount,
         )
+
+    def consumed_quantities(self, cart: ShoppingCart) -> dict[Product, float]:
+        """Consome toda a quantidade do produto contemplada pelo desconto."""
+        quantity = cart.product_quantities().get(self._product, 0.0)
+        return {self._product: quantity} if quantity > 0 else {}
