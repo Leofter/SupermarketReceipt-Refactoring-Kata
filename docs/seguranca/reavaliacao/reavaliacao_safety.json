@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "scan_type": "scan",
+    "stage": "development",
+    "scan_locations": [
+      "/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/project"
+    ],
+    "authenticated": true,
+    "authentication_method": "token",
+    "timestamp": "2026-11-24T17:21:14.603696",
+    "telemetry": {
+      "os_type": "Linux",
+      "os_release": "7.0.0-43-generic",
+      "os_description": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+      "python_version": "3.12.16",
+      "safety_command": "scan",
+      "safety_options": {
+        "target": {
+          "--target": 1
+        },
+        "output": {
+          "--output": 1
+        }
+      },
+      "safety_version": "3.8.1",
+      "safety_source": "cli"
+    },
+    "schema_version": "3.0"
+  },
+  "scan_results": {
+    "files": [],
+    "projects": [
+      {
+        "id": "supermarketreceipt-refactoring-kata",
+        "upload_request_id": null,
+        "location": "/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/project",
+        "policy": {
+          "id": "43a764ca-d19e-4b92-81d6-81f266120d0f",
+          "path": null,
+          "source": "cloud"
+        },
+        "git": {
+          "branch": "feature/security_test_reavaliacao",
+          "tag": "",
+          "commit": "6f0ccb18959baefc8c65185f60d6b2acb920844a",
+          "dirty": false,
+          "origin": "https://github.com/Leofter/SupermarketReceipt-Refactoring-Kata.git"
+        },
+        "files": []
+      }
+    ]
+  }
+}

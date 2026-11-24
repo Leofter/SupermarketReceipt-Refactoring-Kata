@@ -1,0 +1,35 @@
+WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies
+WARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes
+Found 29 known vulnerabilities in 2 packages
+ERROR conda.cli.main_run:execute(148): `conda run python -m pip_audit -r docs/seguranca/reavaliacao/reavaliacao_pip_freeze.txt --no-deps` failed. (See above for error)
+Name     Version ID              Fix Versions
+-------- ------- --------------- -------------
+filelock 3.32.7  CVE-2026-112940 4.2.1
+filelock 3.32.7  CVE-2026-112913 4.2.1
+filelock 3.32.7  CVE-2026-112907 4.2.1
+filelock 3.32.7  CVE-2026-112938 4.2.1
+filelock 3.32.7  CVE-2026-112936 4.0.9
+filelock 3.32.7  CVE-2026-112910 4.2.1
+filelock 3.32.7  CVE-2026-112909 4.2.1
+filelock 3.32.7  CVE-2026-112911 4.2.1
+filelock 3.32.7  CVE-2026-112939 4.2.1
+filelock 3.32.7  CVE-2026-112915 4.2.1
+filelock 3.32.7  CVE-2026-112935 4.2.1
+filelock 3.32.7  CVE-2026-112912 4.2.1
+filelock 3.32.7  CVE-2026-112908 4.2.1
+urllib3  2.0.6   PYSEC-2026-1995 1.26.19,2.2.2
+urllib3  2.0.6   PYSEC-2023-212  1.26.18,2.0.7
+urllib3  2.0.6   PYSEC-2023-212  1.26.18,2.0.7
+urllib3  2.0.6   PYSEC-2026-1999 2.5.0
+urllib3  2.0.6   PYSEC-2026-1998 2.6.0
+urllib3  2.0.6   PYSEC-2026-1994 2.6.0
+urllib3  2.0.6   PYSEC-2026-1996 2.6.3
+urllib3  2.0.6   PYSEC-2026-141  2.7.0
+urllib3  2.0.6   PYSEC-2026-141  2.7.0
+urllib3  2.0.6   PYSEC-2026-1999 2.5.0
+urllib3  2.0.6   PYSEC-2026-1998 2.6.0
+urllib3  2.0.6   PYSEC-2026-1995 1.26.19,2.2.2
+urllib3  2.0.6   PYSEC-2026-1994 2.6.0
+urllib3  2.0.6   PYSEC-2026-1996 2.6.3
+urllib3  2.0.6   PYSEC-2026-4177 2.8.0
+urllib3  2.0.6   PYSEC-2026-4175 2.8.0

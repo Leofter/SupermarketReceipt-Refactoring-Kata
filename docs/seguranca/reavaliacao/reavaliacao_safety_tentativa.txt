@@ -1,0 +1,9 @@
+Comando executado: conda run -n supermarket-sec python -m safety auth status
+Versão: safety 3.8.1
+Data/Hora (UTC): 2026-11-24 20:17:49 UTC
+Código de saída: 0
+Saída:
+[2026-11-24 17:17:49]: Safety 3.8.1
+Safety is not authenticated. Please run 'safety auth login' to log in or 'safety auth enroll' to enroll via MDM.
+
+Diagnóstico: O token de autenticação anterior (emitido em 21/11/2026) expirou após 3 dias. O Safety CLI requer renovação da sessão via 'safety auth login' para executar novos scans na plataforma.
