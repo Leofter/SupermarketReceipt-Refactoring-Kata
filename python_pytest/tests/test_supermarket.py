@@ -164,3 +164,143 @@ def test_offer_for_absent_product_does_not_apply_discount(catalog, teller, cart)
     assert receipt_item.price == pytest.approx(1.99)
     assert receipt_item.total_price == pytest.approx(4.975)
     assert receipt_item.quantity == 2.5
+
+
+@pytest.mark.parametrize(
+    "quantity, percentage, expected_total, expected_discount",
+    [
+        pytest.param(1, 10.0, 9.00, -1.00, id="1-unit-10-percent"),
+        pytest.param(3, 10.0, 27.00, -3.00, id="3-units-10-percent"),
+        pytest.param(3, 20.0, 24.00, -6.00, id="3-units-20-percent"),
+    ],
+)
+def test_percentage_discount_uses_offer_argument(
+    catalog, teller, cart, quantity, percentage, expected_total, expected_discount
+):
+    toothbrush = Product("toothbrush", ProductUnit.EACH)
+    catalog.add_product(toothbrush, 10.00)
+    teller.add_special_offer(
+        SpecialOfferType.TEN_PERCENT_DISCOUNT, toothbrush, percentage
+    )
+    cart.add_item_quantity(toothbrush, quantity)
+
+    receipt = teller.checks_out_articles_from(cart)
+
+    assert_promotion_result(receipt, toothbrush, expected_total, expected_discount)
+
+
+@pytest.mark.parametrize(
+    "quantity, expected_total, expected_discount",
+    [
+        pytest.param(2, 20.00, None, id="2-units-no-complete-group"),
+        pytest.param(3, 20.00, -10.00, id="3-units"),
+        pytest.param(4, 30.00, -10.00, id="4-units"),
+        pytest.param(6, 40.00, -20.00, id="6-units"),
+    ],
+)
+def test_three_for_two_promotion(
+    catalog, teller, cart, quantity, expected_total, expected_discount
+):
+    toothbrush = Product("toothbrush", ProductUnit.EACH)
+    catalog.add_product(toothbrush, 10.00)
+    teller.add_special_offer(SpecialOfferType.THREE_FOR_TWO, toothbrush, 0)
+    cart.add_item_quantity(toothbrush, quantity)
+
+    receipt = teller.checks_out_articles_from(cart)
+
+    assert_promotion_result(receipt, toothbrush, expected_total, expected_discount)
+
+
+@pytest.mark.parametrize(
+    "quantity, expected_total, expected_discount",
+    [
+        pytest.param(1, 10.00, None, id="1-unit-no-complete-pair"),
+        pytest.param(2, 15.00, -5.00, id="2-units"),
+        pytest.param(3, 25.00, -5.00, id="3-units"),
+        pytest.param(4, 30.00, -10.00, id="4-units"),
+        pytest.param(5, 40.00, -10.00, id="5-units"),
+    ],
+)
+def test_two_for_amount_promotion(
+    catalog, teller, cart, quantity, expected_total, expected_discount
+):
+    toothbrush = Product("toothbrush", ProductUnit.EACH)
+    catalog.add_product(toothbrush, 10.00)
+    teller.add_special_offer(SpecialOfferType.TWO_FOR_AMOUNT, toothbrush, 15.00)
+    cart.add_item_quantity(toothbrush, quantity)
+
+    receipt = teller.checks_out_articles_from(cart)
+
+    assert_promotion_result(receipt, toothbrush, expected_total, expected_discount)
+
+
+@pytest.mark.parametrize(
+    "quantity, expected_total, expected_discount",
+    [
+        pytest.param(4, 40.00, None, id="4-units-no-complete-group"),
+        pytest.param(5, 40.00, -10.00, id="5-units"),
+        pytest.param(6, 50.00, -10.00, id="6-units"),
+        pytest.param(10, 80.00, -20.00, id="10-units"),
+    ],
+)
+def test_five_for_amount_promotion(
+    catalog, teller, cart, quantity, expected_total, expected_discount
+):
+    toothbrush = Product("toothbrush", ProductUnit.EACH)
+    catalog.add_product(toothbrush, 10.00)
+    teller.add_special_offer(SpecialOfferType.FIVE_FOR_AMOUNT, toothbrush, 40.00)
+    cart.add_item_quantity(toothbrush, quantity)
+
+    receipt = teller.checks_out_articles_from(cart)
+
+    assert_promotion_result(receipt, toothbrush, expected_total, expected_discount)
+
+
+def test_percentage_discount_on_product_sold_by_weight(catalog, teller, cart):
+    apples = Product("apples", ProductUnit.KILO)
+    catalog.add_product(apples, 4.00)
+    teller.add_special_offer(SpecialOfferType.TEN_PERCENT_DISCOUNT, apples, 10.0)
+    cart.add_item_quantity(apples, 2.5)
+
+    receipt = teller.checks_out_articles_from(cart)
+
+    assert len(receipt.items) == 1
+    item = receipt.items[0]
+    assert item.product is apples
+    assert item.quantity == 2.5
+    assert item.price == pytest.approx(4.00)
+    assert item.total_price == pytest.approx(10.00)
+    assert_promotion_result(receipt, apples, 9.00, -1.00)
+
+
+def test_three_for_two_applies_to_three_separate_additions(catalog, teller, cart):
+    toothbrush = Product("toothbrush", ProductUnit.EACH)
+    catalog.add_product(toothbrush, 10.00)
+    teller.add_special_offer(SpecialOfferType.THREE_FOR_TWO, toothbrush, 0)
+    cart.add_item(toothbrush)
+    cart.add_item(toothbrush)
+    cart.add_item(toothbrush)
+
+    receipt = teller.checks_out_articles_from(cart)
+
+    assert cart.product_quantities == {toothbrush: 3}
+    assert len(receipt.items) == 3
+    for item in receipt.items:
+        assert item.product is toothbrush
+        assert item.quantity == 1
+        assert item.price == pytest.approx(10.00)
+        assert item.total_price == pytest.approx(10.00)
+    assert_promotion_result(receipt, toothbrush, 20.00, -10.00)
+
+
+def assert_promotion_result(receipt, product, expected_total, expected_discount):
+    if expected_discount is None:
+        assert receipt.discounts == []
+        assert receipt.total_price() == pytest.approx(expected_total)
+    else:
+        assert len(receipt.discounts) == 1
+        discount = receipt.discounts[0]
+        assert discount.product is product
+        assert (receipt.total_price(), discount.discount_amount) == pytest.approx(
+            (expected_total, expected_discount)
+        )
