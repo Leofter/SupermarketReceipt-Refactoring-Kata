@@ -4,7 +4,7 @@
 **Data/Hora da Reavaliação (UTC):** 2026-11-24 20:20:56 UTC  
 **Branch Git:** `feature/security_test_reavaliacao`  
 **Commit Git de Referência:** `6f0ccb18959baefc8c65185f60d6b2acb920844a`  
-**Alvo da Reavaliação:** Diretório `project/src` e todas as suas subpastas (Clean Architecture)  
+**Alvo da Reavaliação:** Diretório `project/src` e todas as suas subpastas (Clean Architecture). **Não inclui `project/tests`** (ver ressalva de escopo abaixo)  
 **Ambiente Conda:** `supermarket-sec` (Python 3.12.16)
 
 ---
@@ -12,6 +12,8 @@
 ## 1. Sumário Executivo da Reavaliação
 
 Este relatório apresenta a **reavaliação de segurança** realizada sobre o código refatorado do projeto *Supermarket Receipt*, localizado na pasta `project/src/`. A refatoração adotou os princípios de **Clean Architecture (Arquitetura Limpa)** e design orientado a objetos desacoplado, organizando o código em camadas bem definidas (`domain`, `aplication`, `adapters`, `infrastructure`).
+
+> **Ressalva de escopo (importante):** Esta reavaliação foi focada **exclusivamente no código de produção em `project/src/`**. A reavaliação de segurança dos novos arquivos de testes que serão implementados futuramente em `project/tests/` **ficou de fora deste relatório** e será feita separadamente nessa pasta, por outro desenvolvedor, após esses testes existirem. Esta ressalva é apenas de escopo: o conteúdo dos achados, métricas e conclusões apresentados a seguir permanece inalterado e se aplica estritamente ao diretório aqui avaliado (`project/src`).
 
 ### Principais Conclusões da Reavaliação:
 
@@ -40,7 +42,7 @@ As informações completas do ambiente foram consolidadas no arquivo de evidênc
 | **Proxy Configurado** | Falso (nenhum proxy HTTP/HTTPS ativo) |
 | **Branch Git** | `feature/security_test_reavaliacao` |
 | **Commit Git** | `6f0ccb18959baefc8c65185f60d6b2acb920844a` |
-| **Alvo Analisado** | `project/src` (e todas as suas subpastas) |
+| **Alvo Analisado** | `project/src` (e todas as suas subpastas). `project/tests` não analisado nesta etapa |
 
 ### Versões das Ferramentas Utilizadas:
 - **Conda:** `26.7.1`
