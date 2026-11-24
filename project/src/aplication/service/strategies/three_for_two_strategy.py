@@ -30,3 +30,9 @@ class ThreeForTwoStrategy(DiscountStrategy):
             description="3 for 2",
             amount=discount_amount,
         )
+
+    def consumed_quantities(self, cart: ShoppingCart) -> dict[Product, float]:
+        """Consome apenas os lotes completos de 3 unidades."""
+        quantity = int(cart.product_quantities().get(self._product, 0))
+        consumed = (quantity // 3) * 3
+        return {self._product: float(consumed)} if consumed > 0 else {}
