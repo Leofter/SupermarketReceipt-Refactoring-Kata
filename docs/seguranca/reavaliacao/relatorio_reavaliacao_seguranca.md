@@ -13,7 +13,7 @@
 
 Este relatório apresenta a **reavaliação de segurança** realizada sobre o código refatorado do projeto *Supermarket Receipt*, localizado na pasta `project/src/`. A refatoração adotou os princípios de **Clean Architecture (Arquitetura Limpa)** e design orientado a objetos desacoplado, organizando o código em camadas bem definidas (`domain`, `aplication`, `adapters`, `infrastructure`).
 
-> **Ressalva de escopo (importante):** Esta reavaliação foi focada **exclusivamente no código de produção em `project/src/`**. A reavaliação de segurança dos novos arquivos de testes que serão implementados futuramente em `project/tests/` **ficou de fora deste relatório** e será feita separadamente nessa pasta, por outro desenvolvedor, após esses testes existirem. Esta ressalva é apenas de escopo: o conteúdo dos achados, métricas e conclusões apresentados a seguir permanece inalterado e se aplica estritamente ao diretório aqui avaliado (`project/src`).
+> **Ressalva de escopo (importante):** Esta reavaliação foi focada **exclusivamente no código de produção em `project/src/`**. A reavaliação de segurança dos novos arquivos de testes que foram implementados em `project/tests/` **ficou de fora deste relatório** e será feita separadamente nessa pasta. Esta ressalva é apenas de escopo: o conteúdo dos achados, métricas e conclusões apresentados a seguir permanece inalterado e se aplica estritamente ao diretório aqui avaliado (`project/src`).
 
 ### Principais Conclusões da Reavaliação:
 
