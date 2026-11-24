@@ -32,7 +32,7 @@ Este documento consolida a **linha de base de segurança** do projeto *Supermark
 ## 2. Metodologia e Ambiente de Execução
 
 ### 2.1 Identificação do Sistema
-As informações completas do sistema operacional e do ferramental foram registradas no arquivo de evidência [base_ambiente.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_ambiente.txt).
+As informações completas do sistema operacional e do ferramental foram registradas no arquivo de evidência [base_ambiente.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_ambiente.txt).
 
 | Propriedade | Valor Registrado |
 | :--- | :--- |
@@ -79,9 +79,9 @@ As informações completas do sistema operacional e do ferramental foram registr
 4. **Congelamento das Dependências do Projeto:**
    Realizado antes de instalar as ferramentas de segurança para isolar o escopo do software:
    ```bash
-   conda run -n supermarket-sec python -m pip freeze > docs/seguranca/base_pip_freeze.txt
+   conda run -n supermarket-sec python -m pip freeze > docs/seguranca/avaliacao/base_pip_freeze.txt
    ```
-   - **Análise do formato:** O arquivo [base_pip_freeze.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_pip_freeze.txt) foi analisado e **não continha** linhas com prefixo `@ file:///...` (todos os pacotes já se encontravam no padrão `nome==versão`).
+   - **Análise do formato:** O arquivo [base_pip_freeze.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_pip_freeze.txt) foi analisado e **não continha** linhas com prefixo `@ file:///...` (todos os pacotes já se encontravam no padrão `nome==versão`).
    - **Observação sobre User Site-Packages:** Foi detectado que o interpretador do Conda herdou pacotes de `/home/beatriz/.local/lib/python3.12/site-packages` (`ENABLE_USER_SITE: True`), o que fez com que o `pip` reaproveitasse a biblioteca `urllib3==2.0.6` já existente no ambiente do usuário ao satisfazer o requisito transitivo de `approvaltests -> empty-files -> requests`.
 
 ---
@@ -97,8 +97,8 @@ Foram executadas três verificações com o Bandit 1.9.4:
 
 | Escopo Analisado | Comando | Código de Saída | Evidência Gerada |
 | :--- | :--- | :---: | :--- |
-| `src tests` (TXT) | `conda run -n supermarket-sec python -m bandit -r src tests -x .approval_tests_temp -f txt -o docs/seguranca/base_bandit.txt` | **1** | [base_bandit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_bandit.txt) |
-| `src tests` (JSON) | `conda run -n supermarket-sec python -m bandit -r src tests -x .approval_tests_temp -f json -o docs/seguranca/base_bandit.json -q` | **1** | [base_bandit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_bandit.json) |
+| `src tests` (TXT) | `conda run -n supermarket-sec python -m bandit -r src tests -x .approval_tests_temp -f txt -o docs/seguranca/avaliacao/base_bandit.txt` | **1** | [base_bandit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_bandit.txt) |
+| `src tests` (JSON) | `conda run -n supermarket-sec python -m bandit -r src tests -x .approval_tests_temp -f json -o docs/seguranca/avaliacao/base_bandit.json -q` | **1** | [base_bandit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_bandit.json) |
 | `src` (Produção) | `conda run -n supermarket-sec python -m bandit -r src` | **0** | Saída no terminal (registrada na console) |
 
 ### 4.2 Métricas de Código e Alertas do Bandit
@@ -135,19 +135,19 @@ Todos os 7 achados estão localizados no arquivo de testes `tests/test_supermark
 
 ## 5. Auditoria de Dependências (SCA) - pip-audit
 
-A auditoria foi executada com o `pip-audit 2.10.1` apontando estritamente para o arquivo congelado `docs/seguranca/base_pip_freeze.txt` com a opção `--no-deps`.
+A auditoria foi executada com o `pip-audit 2.10.1` apontando estritamente para o arquivo congelado `docs/seguranca/avaliacao/base_pip_freeze.txt` com a opção `--no-deps`.
 
 ### 5.1 Comandos Executados e Códigos de Saída
 
 ```bash
-conda run -n supermarket-sec python -m pip_audit -r docs/seguranca/base_pip_freeze.txt --no-deps -f json -o docs/seguranca/base_pip_audit.json
-conda run -n supermarket-sec python -m pip_audit -r docs/seguranca/base_pip_freeze.txt --no-deps 2>&1 | tee docs/seguranca/base_pip_audit.txt
+conda run -n supermarket-sec python -m pip_audit -r docs/seguranca/avaliacao/base_pip_freeze.txt --no-deps -f json -o docs/seguranca/avaliacao/base_pip_audit.json
+conda run -n supermarket-sec python -m pip_audit -r docs/seguranca/avaliacao/base_pip_freeze.txt --no-deps 2>&1 | tee docs/seguranca/avaliacao/base_pip_audit.txt
 ```
 
 - **Código de saída:** `1` (vulnerabilidades encontradas)
 - **Pacotes avaliados no `base_pip_freeze.txt`:** 28 pacotes
 - **Total de vulnerabilidades encontradas:** 16 vulnerabilidades em 1 pacote (`urllib3==2.0.6`)
-- **Evidências:** [base_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_pip_audit.txt) e [base_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_pip_audit.json)
+- **Evidências:** [base_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_pip_audit.txt) e [base_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_pip_audit.json)
 
 ### 5.2 Vulnerabilidades Identificadas no `urllib3 2.0.6`
 
@@ -182,7 +182,7 @@ Ao auditar o ambiente inteiro (`python -m pip_audit`), foram identificadas 13 vu
 O Safety 3.8.1 foi executado após a autenticação da CLI.
 
 ### 6.1 Histórico de Autenticação e Tentativa Inicial
-- **Tentativa Inicial (Não Autenticado):** O comando `safety auth status` indicou ausência de token de acesso. A tentativa de execução do scan foi interceptada e registrada em [base_safety_tentativa.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_safety_tentativa.txt) com erro `EOF when reading a line` (código de saída `1`), respeitando a diretriz de parada mandatória.
+- **Tentativa Inicial (Não Autenticado):** O comando `safety auth status` indicou ausência de token de acesso. A tentativa de execução do scan foi interceptada e registrada em [base_safety_tentativa.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_safety_tentativa.txt) com erro `EOF when reading a line` (código de saída `1`), respeitando a diretriz de parada mandatória.
 - **Autenticação Concluída:** O usuário efetuou o login interativo via navegador com a conta `beatrizestevez29@gmail.com`. A confirmação foi registrada com sucesso:
   ```text
   [2026-11-21 13:41:15]: Safety 3.8.1
@@ -191,14 +191,14 @@ O Safety 3.8.1 foi executado após a autenticação da CLI.
 
 ### 6.2 Execução do Scan
 ```bash
-conda run -n supermarket-sec python -m safety scan 2>&1 | tee docs/seguranca/base_safety.txt
-conda run -n supermarket-sec python -m safety scan --output json > docs/seguranca/base_safety.json
+conda run -n supermarket-sec python -m safety scan 2>&1 | tee docs/seguranca/avaliacao/base_safety.txt
+conda run -n supermarket-sec python -m safety scan --output json > docs/seguranca/avaliacao/base_safety.json
 ```
 
 - **Código de saída:** `0` (sem vulnerabilidades bloqueantes segundo a política)
 - **Arquivo analisado:** `python_pytest/requirements.txt`
 - **Dependências avaliadas:** 4 dependências diretas (`pytest`, `approvaltests`, `pytest-approvaltests`, `coverage`)
-- **Evidências:** [base_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_safety.txt) e [base_safety.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_safety.json)
+- **Evidências:** [base_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_safety.txt) e [base_safety.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_safety.json)
 
 ### 6.3 Detalhamento do Achado do Safety
 
@@ -243,15 +243,15 @@ A saída registrou: `1 vulnerability found, 1 ignored due to policy`.
 
 ## 9. Inventário de Evidências
 
-Todos os arquivos brutos e saídas de comandos foram preservados na pasta `docs/seguranca/`:
+Todos os arquivos brutos e saídas de comandos foram preservados na pasta `docs/seguranca/avaliacao/`:
 
-- [base_ambiente.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_ambiente.txt): Dados de ambiente, data/hora, hardware, proxy, commit git e versões.
-- [base_pip_freeze.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_pip_freeze.txt): Lista de pacotes e versões congeladas antes da instalação das ferramentas.
-- [base_bandit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_bandit.txt): Saída textual detalhada da varredura do Bandit em `src` e `tests`.
-- [base_bandit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_bandit.json): Relatório estruturado do Bandit em JSON contendo métricas por arquivo e totais.
-- [base_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_pip_audit.txt): Tabela das vulnerabilidades identificadas pelo pip-audit sobre o `base_pip_freeze.txt`.
-- [base_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_pip_audit.json): Estrutura detalhada em JSON do pip-audit com metadados de cada CVE/PYSEC.
-- [base_safety_tentativa.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_safety_tentativa.txt): Registro da tentativa inicial de scan antes da autenticação interativa.
-- [base_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_safety.txt): Saída do scan de vulnerabilidades executado pelo Safety autenticado.
-- [base_safety.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/base_safety.json): Relatório estruturado do Safety em formato JSON.
-- [relatorio_linha_de_base_seguranca.md](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/relatorio_linha_de_base_seguranca.md): Este relatório consolidado.
+- [base_ambiente.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_ambiente.txt): Dados de ambiente, data/hora, hardware, proxy, commit git e versões.
+- [base_pip_freeze.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_pip_freeze.txt): Lista de pacotes e versões congeladas antes da instalação das ferramentas.
+- [base_bandit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_bandit.txt): Saída textual detalhada da varredura do Bandit em `src` e `tests`.
+- [base_bandit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_bandit.json): Relatório estruturado do Bandit em JSON contendo métricas por arquivo e totais.
+- [base_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_pip_audit.txt): Tabela das vulnerabilidades identificadas pelo pip-audit sobre o `base_pip_freeze.txt`.
+- [base_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_pip_audit.json): Estrutura detalhada em JSON do pip-audit com metadados de cada CVE/PYSEC.
+- [base_safety_tentativa.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_safety_tentativa.txt): Registro da tentativa inicial de scan antes da autenticação interativa.
+- [base_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_safety.txt): Saída do scan de vulnerabilidades executado pelo Safety autenticado.
+- [base_safety.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/base_safety.json): Relatório estruturado do Safety em formato JSON.
+- [relatorio_linha_de_base_seguranca.md](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/seguranca/avaliacao/relatorio_linha_de_base_seguranca.md): Este relatório consolidado.
