@@ -5,7 +5,7 @@
 **Branch Git:** `feature/reavaliacao_3`
 **Commit Git de Referência do Código Avaliado:** `8db0849895ba641eb07eeb6a6617211a3b7bdb45`
 **Alvo da Avaliação:** `project/` por completo — `project/src`, `project/tests`, `project/main.py` e `project/requirements.txt`
-**Pasta de Evidências:** `docs/security/terceira_avaliacao_refatorado_v2/security/`
+**Pasta de Evidências:** `docs/security/terceira_avaliacao_refatorado_v2/`
 **Ambiente:** `supermarket-sec` (Python 3.12.16) para Bandit/Safety; venv temporário para isolar requisitos no pip-audit
 
 ---
@@ -70,7 +70,7 @@ A lacuna apontada na segunda avaliação — `project/tests` fora de escopo — 
 
 ### 3.1 Identificação do ambiente
 
-Registro completo em [`after_ambiente.txt`](security/after_ambiente.txt).
+Registro completo em [`after_ambiente.txt`](after_ambiente.txt).
 
 | Propriedade | Valor |
 | :--- | :--- |
@@ -101,7 +101,7 @@ Para isolar exatamente as dependências declaradas pelo produto, foi criado um v
 python3 -m venv /tmp/opencode/security-third-venv
 /tmp/opencode/security-third-venv/bin/python -m pip install -r project/requirements.txt
 /tmp/opencode/security-third-venv/bin/python -m pip freeze \
-  > docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt
+  > docs/security/terceira_avaliacao_refatorado_v2/after_pip_freeze.txt
 /tmp/opencode/security-third-venv/bin/python -m pip install pip-audit==2.10.1
 ```
 
@@ -109,13 +109,13 @@ Pacotes congelados: `iniconfig==2.3.1`, `packaging==26.4`, `pluggy==1.7.0`, `Pyg
 
 ### 3.4 Autenticação do Safety
 
-A CLI iniciou a rodada sem autenticação, conforme registrado em [`after_safety_tentativa.txt`](security/after_safety_tentativa.txt). O comando informado ao usuário foi:
+A CLI iniciou a rodada sem autenticação, conforme registrado em [`after_safety_tentativa.txt`](after_safety_tentativa.txt). O comando informado ao usuário foi:
 
 ```bash
 conda run -n supermarket-sec python -m safety auth login
 ```
 
-Após a autenticação, o status foi confirmado em [`after_safety_auth_status.txt`](security/after_safety_auth_status.txt):
+Após a autenticação, o status foi confirmado em [`after_safety_auth_status.txt`](after_safety_auth_status.txt):
 
 ```text
 Authenticated as beatrizestevez29@gmail.com
@@ -131,13 +131,13 @@ Comandos executados a partir da raiz do repositório:
 
 ```bash
 conda run -n supermarket-sec python -m bandit -r project/src project/main.py \
-  -f txt -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.txt
+  -f txt -o docs/security/terceira_avaliacao_refatorado_v2/after_bandit_src.txt
 conda run -n supermarket-sec python -m bandit -r project/src project/main.py \
-  -f json -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.json -q
+  -f json -o docs/security/terceira_avaliacao_refatorado_v2/after_bandit_src.json -q
 conda run -n supermarket-sec python -m bandit -r project -x project/.approval_tests_temp \
-  -f txt -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.txt
+  -f txt -o docs/security/terceira_avaliacao_refatorado_v2/after_bandit_all.txt
 conda run -n supermarket-sec python -m bandit -r project -x project/.approval_tests_temp \
-  -f json -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.json -q
+  -f json -o docs/security/terceira_avaliacao_refatorado_v2/after_bandit_all.json -q
 ```
 
 #### 4.1.1 Produção
@@ -148,7 +148,7 @@ conda run -n supermarket-sec python -m bandit -r project -x project/.approval_te
 - **`#nosec`:** 0
 - **Severidade:** `High: 0`, `Medium: 0`, `Low: 0`, `Undefined: 0`
 - **Confiança:** `High: 0`, `Medium: 0`, `Low: 0`, `Undefined: 0`
-- **Evidências:** [`after_bandit_src.txt`](security/after_bandit_src.txt), [`after_bandit_src.json`](security/after_bandit_src.json)
+- **Evidências:** [`after_bandit_src.txt`](after_bandit_src.txt), [`after_bandit_src.json`](after_bandit_src.json)
 
 > **Diagnóstico:** nenhuma fragilidade estática detectada, inclusive na nova camada de persistência e nos repositórios SQLite/SQLAlchemy.
 
@@ -158,7 +158,7 @@ conda run -n supermarket-sec python -m bandit -r project -x project/.approval_te
 - **LOC:** 1152 (732 produção + 420 testes)
 - **Severidade:** `High: 0`, `Medium: 0`, `Low: 34`, `Undefined: 0`
 - **Confiança:** `High: 34`, `Medium: 0`, `Low: 0`, `Undefined: 0`
-- **Evidências:** [`after_bandit_all.txt`](security/after_bandit_all.txt), [`after_bandit_all.json`](security/after_bandit_all.json)
+- **Evidências:** [`after_bandit_all.txt`](after_bandit_all.txt), [`after_bandit_all.json`](after_bandit_all.json)
 
 | Arquivo de Teste | LOC | Alertas `B101` | Classificação |
 | :--- | ---: | ---: | :--- |
@@ -177,24 +177,24 @@ Comandos executados:
 
 ```bash
 /tmp/opencode/security-third-venv/bin/python -m pip_audit \
-  -r docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt \
+  -r docs/security/terceira_avaliacao_refatorado_v2/after_pip_freeze.txt \
   --no-deps -f json \
-  -o docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.json
+  -o docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit.json
 /tmp/opencode/security-third-venv/bin/python -m pip_audit \
-  -r docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt \
-  --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.txt
+  -r docs/security/terceira_avaliacao_refatorado_v2/after_pip_freeze.txt \
+  --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit.txt
 /tmp/opencode/security-third-venv/bin/python -m pip_audit \
   -r project/requirements.txt --no-deps -f json \
-  -o docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit_requirements.json
+  -o docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit_requirements.json
 /tmp/opencode/security-third-venv/bin/python -m pip_audit \
-  -r project/requirements.txt --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit_requirements.txt
+  -r project/requirements.txt --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit_requirements.txt
 ```
 
 - **Código de saída:** `0` em todas as quatro execuções
 - **Saída textual:** `No known vulnerabilities found`
 - **Dependências listadas no JSON:** 6, todas com `vulns: []`
 - **Correções sugeridas:** `0`
-- **Evidências:** [`after_pip_audit.txt`](security/after_pip_audit.txt), [`after_pip_audit.json`](security/after_pip_audit.json), [`after_pip_audit_requirements.txt`](security/after_pip_audit_requirements.txt), [`after_pip_audit_requirements.json`](security/after_pip_audit_requirements.json)
+- **Evidências:** [`after_pip_audit.txt`](after_pip_audit.txt), [`after_pip_audit.json`](after_pip_audit.json), [`after_pip_audit_requirements.txt`](after_pip_audit_requirements.txt), [`after_pip_audit_requirements.json`](after_pip_audit_requirements.json)
 
 | Pacote | Versão | Vulnerabilidades |
 | :--- | :---: | :---: |
@@ -213,9 +213,9 @@ Comandos executados:
 
 ```bash
 conda run -n supermarket-sec python -m safety scan --target project \
-  2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.txt
+  2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/after_safety.txt
 conda run -n supermarket-sec python -m safety scan --target project --output json \
-  > docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.json
+  > docs/security/terceira_avaliacao_refatorado_v2/after_safety.json
 ```
 
 - **Código de saída:** `0`
@@ -226,7 +226,7 @@ conda run -n supermarket-sec python -m safety scan --target project --output jso
 - **Arquivo detectado:** `project/requirements.txt`
 - **Dependências testadas:** 2
 - **Resultado:** `0 security issues found, 0 fixes suggested`
-- **Evidências:** [`after_safety.txt`](security/after_safety.txt), [`after_safety.json`](security/after_safety.json), [`after_safety_json_stderr.txt`](security/after_safety_json_stderr.txt)
+- **Evidências:** [`after_safety.txt`](after_safety.txt), [`after_safety.json`](after_safety.json), [`after_safety_json_stderr.txt`](after_safety_json_stderr.txt)
 
 | Dependência | Especificação | Problemas conhecidos |
 | :--- | :--- | :---: |
@@ -242,7 +242,7 @@ cd project
 
 - **Código de saída:** `0`
 - **Resultado:** `30 passed in 0.37s`
-- **Evidência:** [`after_pytest.txt`](security/after_pytest.txt)
+- **Evidência:** [`after_pytest.txt`](after_pytest.txt)
 
 ---
 
@@ -289,20 +289,20 @@ Recomendações:
 
 | Arquivo | Conteúdo |
 | :--- | :--- |
-| [`after_ambiente.txt`](security/after_ambiente.txt) | Data/hora, SO, shell, proxy, branch, commit, versões das ferramentas |
-| [`after_pip_freeze.txt`](security/after_pip_freeze.txt) | Pacotes congelados do venv isolado antes da instalação do pip-audit |
-| [`after_pip_audit.txt`](security/after_pip_audit.txt) | Saída textual do pip-audit sobre o congelamento |
-| [`after_pip_audit.json`](security/after_pip_audit.json) | JSON estruturado do pip-audit sobre o congelamento |
-| [`after_pip_audit_requirements.txt`](security/after_pip_audit_requirements.txt) | Saída textual do pip-audit sobre `project/requirements.txt` |
-| [`after_pip_audit_requirements.json`](security/after_pip_audit_requirements.json) | JSON estruturado do pip-audit sobre `project/requirements.txt` |
-| [`after_bandit_src.txt`](security/after_bandit_src.txt) | Bandit em `project/src` + `project/main.py`: 732 LOC, 0 achados |
-| [`after_bandit_src.json`](security/after_bandit_src.json) | Métricas estruturadas da varredura de produção |
-| [`after_bandit_all.txt`](security/after_bandit_all.txt) | Bandit em `project/`: 1152 LOC, 34 `B101` |
-| [`after_bandit_all.json`](security/after_bandit_all.json) | Métricas estruturadas e detalhamento dos 34 alertas |
-| [`after_safety_tentativa.txt`](security/after_safety_tentativa.txt) | Registro da verificação inicial sem autenticação |
-| [`after_safety_auth_status.txt`](security/after_safety_auth_status.txt) | Confirmação da autenticação do Safety |
-| [`after_safety.txt`](security/after_safety.txt) | Saída textual do scan autenticado em `project/` |
-| [`after_safety.json`](security/after_safety.json) | Relatório estruturado do Safety autenticado |
-| [`after_safety_json_stderr.txt`](security/after_safety_json_stderr.txt) | Avisos de depreciação emitidos pela CLI do Safety |
-| [`after_pytest.txt`](security/after_pytest.txt) | Sanidade funcional: 30 testes aprovados |
+| [`after_ambiente.txt`](after_ambiente.txt) | Data/hora, SO, shell, proxy, branch, commit, versões das ferramentas |
+| [`after_pip_freeze.txt`](after_pip_freeze.txt) | Pacotes congelados do venv isolado antes da instalação do pip-audit |
+| [`after_pip_audit.txt`](after_pip_audit.txt) | Saída textual do pip-audit sobre o congelamento |
+| [`after_pip_audit.json`](after_pip_audit.json) | JSON estruturado do pip-audit sobre o congelamento |
+| [`after_pip_audit_requirements.txt`](after_pip_audit_requirements.txt) | Saída textual do pip-audit sobre `project/requirements.txt` |
+| [`after_pip_audit_requirements.json`](after_pip_audit_requirements.json) | JSON estruturado do pip-audit sobre `project/requirements.txt` |
+| [`after_bandit_src.txt`](after_bandit_src.txt) | Bandit em `project/src` + `project/main.py`: 732 LOC, 0 achados |
+| [`after_bandit_src.json`](after_bandit_src.json) | Métricas estruturadas da varredura de produção |
+| [`after_bandit_all.txt`](after_bandit_all.txt) | Bandit em `project/`: 1152 LOC, 34 `B101` |
+| [`after_bandit_all.json`](after_bandit_all.json) | Métricas estruturadas e detalhamento dos 34 alertas |
+| [`after_safety_tentativa.txt`](after_safety_tentativa.txt) | Registro da verificação inicial sem autenticação |
+| [`after_safety_auth_status.txt`](after_safety_auth_status.txt) | Confirmação da autenticação do Safety |
+| [`after_safety.txt`](after_safety.txt) | Saída textual do scan autenticado em `project/` |
+| [`after_safety.json`](after_safety.json) | Relatório estruturado do Safety autenticado |
+| [`after_safety_json_stderr.txt`](after_safety_json_stderr.txt) | Avisos de depreciação emitidos pela CLI do Safety |
+| [`after_pytest.txt`](after_pytest.txt) | Sanidade funcional: 30 testes aprovados |
 | [`relatorio_terceira_avaliacao_seguranca.md`](relatorio_terceira_avaliacao_seguranca.md) | Este relatório consolidado |
