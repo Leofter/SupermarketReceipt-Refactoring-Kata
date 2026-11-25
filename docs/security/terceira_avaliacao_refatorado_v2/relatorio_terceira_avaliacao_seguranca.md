@@ -1,209 +1,308 @@
-# Relatório da Terceira Avaliação de Segurança (Refatorado v2)
+# Relatório da Terceira Avaliação de Segurança (Refatorado v2) — Reexecução Completa
 
 **Projeto:** Supermarket Receipt Refactoring Kata (Python + pytest + SQLite/SQLAlchemy)  
-**Data/Hora da Reavaliação (UTC):** 2026-11-24 21:43:00 UTC (carimbo dos artefatos Bandit)  
-**Data de Consolidação do Relatório (UTC):** 2026-11-25 21:34:50 UTC  
-**Branch Git:** `feature/reavaliacao_3`  
-**Commit Git de Referência:** `35bac2142b8106d6d3d03af1698f87abfe0c24f4`  
-**Alvo da Reavaliação:** `project/tests` (lacuna apontada na segunda avaliação), `project/src` (incluindo a nova camada `infrastructure/database`) e `project/main.py`  
-**Pasta de Evidências:** `docs/security/terceira_avaliacao_refatorado_v2/security/`  
-**Ambiente:** Ambiente isolado de segurança (Bandit 1.9.4, pip-audit 2.10.1, Safety 3.8.1)
+**Data/Hora da Reexecução (UTC):** 2026-11-25 22:29–22:34 UTC
+**Branch Git:** `feature/reavaliacao_3`
+**Commit Git de Referência do Código Avaliado:** `8db0849895ba641eb07eeb6a6617211a3b7bdb45`
+**Alvo da Avaliação:** `project/` por completo — `project/src`, `project/tests`, `project/main.py` e `project/requirements.txt`
+**Pasta de Evidências:** `docs/security/terceira_avaliacao_refatorado_v2/security/`
+**Ambiente:** `supermarket-sec` (Python 3.12.16) para Bandit/Safety; venv temporário para isolar requisitos no pip-audit
 
 ---
 
-## 1. Sumário Executivo da Terceira Avaliação
+## 1. Sumário Executivo
 
-Este relatório fecha o ciclo de reavaliações de segurança do projeto. A segunda avaliação analisou exclusivamente o código de produção (`project/src`) e deixou explicitamente fora de escopo os arquivos de testes implementados em `project/tests/`. A terceira reavaliação amplia o escopo para esses testes e para a nova implementação de persistência em banco de dados (SQLite via SQLAlchemy), mantendo a mesma metodologia (Bandit, pip-audit e Safety) e o comparativo com a linha de base e com a reavaliação anterior.
+A terceira avaliação foi **apagada e refeita integralmente** a partir do estado atual do branch. A versão anterior desta pasta continha artefatos gerados antes do merge da persistência SQLite e registrava o Safety como **não executado** por ausência de autenticação. Nesta reexecução, a CLI do Safety foi autenticada pelo próprio usuário e o scan foi concluído com sucesso.
 
-### Principais Conclusões:
+Resultados consolidados:
 
 1. **Bandit (SAST):**
-   - **Código de produção (`project/src` + `project/main.py`):** **0 vulnerabilidades** em **647 linhas de código** (artefato arquivado), sem achados de severidade `High`, `Medium` ou `Low`.
-   - **Varredura completa (`project/`):** **973 linhas**, com **29 alertas `B101:assert_used`** (severidade `Low`, confiança `High`) distribuídos em 4 arquivos de teste. Trata-se do mesmo ruído de teste identificado na linha de base (7 alertas), porém ampliado em função da nova suíte. Nenhum alerta real de segurança foi encontrado.
-   - **Verificação complementar pós-banco (ver §3.1):** com a camada de persistência já integrada, produção passou a **732 LOC — 0 achados** e a varredura completa passou a **1152 LOC — 34 alertas `B101`** (os 5 adicionais em `project/tests/test_sqlite_repositories.py`), todos igualmente classificados como ruído de teste.
+   - **Produção (`project/src` + `project/main.py`, incluindo `infrastructure/database/`):** **0 vulnerabilidades** em **732 LOC**, código de saída `0`.
+   - **`project/` completo (exceto o diretório temporário legado `.approval_tests_temp`):** **1152 LOC**, **0 achados reais** e **34 alertas `B101:assert_used`** em testes (severidade `Low`, confiança `High`). Todos classificados como ruído esperado do `pytest`.
+   - Os 34 alertas estão distribuídos em 5 arquivos de teste, incluindo os 5 novos alertas do arquivo de persistência `test_sqlite_repositories.py`.
 2. **pip-audit (SCA):**
-   - Resultado: **`No known vulnerabilities found`**. Foram congelados 5 pacotes e o JSON estruturado lista 4 dependências sem vulnerabilidades (`iniconfig`, `pluggy`, `Pygments`, `pytest`).
-   - A verificação complementar sobre o `project/requirements.txt` atual (`SQLAlchemy==2.1.9` + `pytest==9.2.0`) também retornou **0 vulnerabilidades**, cobrindo a dependência introduzida pelo banco de dados.
-   - As 16 vulnerabilidades do `urllib3==2.0.6` da linha de base continuam **eliminadas**.
+   - **`No known vulnerabilities found`** tanto sobre o `after_pip_freeze.txt` quanto sobre `project/requirements.txt`.
+   - O congelamento registrou **7 pacotes**; o JSON estruturado listou **6 dependências avaliadas** (`iniconfig`, `pluggy`, `pygments`, `pytest`, `sqlalchemy`, `typing-extensions`), todas com `vulns: []` e `fixes: []`.
+   - A dependência de produção introduzida pelo banco, `SQLAlchemy==2.1.9`, foi explicitamente coberta pela auditoria.
 3. **Safety (SCA):**
-   - **Não conclusivo nesta rodada:** a CLI não estava autenticada e a execução foi interrompida com `EOF when reading a line`. Não há artefato JSON de Safety nesta pasta (ao contrário das avaliações anteriores). O resultado não deve ser lido como "0 vulnerabilidades do Safety", e sim como **execução não realizada por limitação de autenticação**.
+   - Executado **autenticado** como `beatrizestevez29@gmail.com`, com política buscada da Safety Platform.
+   - **2 dependências testadas** (`SQLAlchemy==2.1.9` e `pytest==9.2.0`), **0 problemas de segurança**, **0 correções sugeridas**, código de saída `0`.
+   - Evidência JSON agora presente: `after_safety.json`, com `authenticated: true`.
+4. **Sanidade funcional:**
+   - `pytest -q`: **30 passed**, código de saída `0`.
 
 > [!NOTE]
-> **Ressalva de Segurança:** As ferramentas cobrem padrões estáticos e vulnerabilidades conhecidas (CVEs/PYSEC catalogadas). Elas não comprovam segurança absoluta, não detectam falhas lógicas de negócio nem ataques zero-day. Além disso, os artefatos arquivados nesta pasta foram gerados em 2026-11-24 21:43 UTC, antes do merge da implementação do banco (commit `3f395fa`, 2026-11-25); por isso, os números da camada de persistência são apresentados separadamente como verificação complementar (§3.1 e §3.2).
+> **Ressalva de Segurança:** as ferramentas cobrem padrões estáticos e vulnerabilidades conhecidas catalogadas. Elas não comprovam segurança absoluta, não detectam falhas lógicas de negócio nem ataques zero-day. O diretório `.approval_tests_temp` foi excluído da varredura completa por ser artefato temporário legado, seguindo o critério da primeira avaliação.
 
 ---
 
-## 2. Metodologia e Ambiente da Terceira Avaliação
+## 2. O que mudou em relação à terceira avaliação anterior
 
-As informações primárias estão consolidadas nos arquivos de evidência de [docs/security/terceira_avaliacao_refatorado_v2/security/](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/).
-
-| Propriedade | Valor Registrado |
-| :--- | :--- |
-| **Data/Hora dos Artefatos (UTC)** | 2026-11-24 21:43:00 UTC (Bandit: `21:43:00.388616` para produção e `21:43:00.543371` para varredura completa) |
-| **Branch Git** | `feature/reavaliacao_3` |
-| **Commit Git Atual** | `35bac2142b8106d6d3d03af1698f87abfe0c24f4` |
-| **Alvos Analisados** | `project/src`, `project/tests`, `project/main.py` e `project/requirements.txt` |
-| **Diretório Raiz dos Comandos** | `/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata` |
-| **Ambiente de Execução do Safety** | `/tmp/sec-venv` (Python 3.13, conforme avisos de Deprecation no artefato) |
-
-### Versões das Ferramentas Utilizadas:
-- **Bandit:** `1.9.4` (registrado nos metadados `more_info` do JSON e na saída TXT).
-- **pip-audit:** `2.10.1` (conforme README do projeto e avaliações anteriores).
-- **Safety:** `3.8.1` (conforme README do projeto e avaliações anteriores; autenticação ausente nesta rodada).
-- **Dependências congeladas:** `iniconfig==2.3.1`, `packaging==26.4`, `pluggy==1.7.0`, `Pygments==2.21.0`, `pytest==9.2.0`.
-
-### Escopos executados (reconstruídos a partir das evidências):
-
-| Ferramenta | Escopo / Comando | Evidência Gerada |
+| Item | Terceira avaliação anterior | Reexecução atual |
 | :--- | :--- | :--- |
-| Bandit | `python -m bandit -r project/src project/main.py` (647 LOC) | [after_bandit_src.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.txt) |
-| Bandit | `python -m bandit -r project` (973 LOC, TXT e JSON) | [after_bandit_all.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.txt) e [after_bandit_all.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.json) |
-| pip-audit | `python -m pip_audit -r .../after_pip_freeze.txt --no-deps` (TXT e JSON) | [after_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.txt) e [after_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.json) |
-| Safety | `python -m safety scan ...` (sem token de acesso) | [after_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.txt) |
+| **Artefatos** | Gerados em 2026-11-24 21:43 UTC, antes do merge do banco (`3f395fa`) | Regerados em 2026-11-25 sobre o código atual, já com banco e novos testes |
+| **Produção Bandit** | 647 LOC no artefato original; 732 LOC apenas como verificação complementar | **732 LOC oficiais**, incluindo `infrastructure/database/` e `main.py` |
+| **Varredura completa Bandit** | 973 LOC / 29 `B101` no artefato original; 1152 LOC / 34 `B101` como verificação complementar | **1152 LOC / 34 `B101`** em artefatos oficiais TXT e JSON |
+| **pip-audit** | 5 pacotes congelados, sem `SQLAlchemy`; verificação complementar separada cobriu o banco | **7 pacotes congelados**, incluindo `SQLAlchemy==2.1.9` e `typing_extensions==4.16.0`; auditoria oficial cobre banco e testes |
+| **Safety** | Não executado: `EOF when reading a line`, sem JSON | **Executado e autenticado**; 2 dependências testadas, 0 problemas, JSON arquivado |
+| **Evidências adicionais** | Não havia JSON de Safety, JSON de produção Bandit nem registro de teste funcional | Adicionados `after_safety.json`, `after_safety_auth_status.txt`, `after_bandit_src.json`, `after_pip_audit_requirements.*` e `after_pytest.txt` |
+
+### 2.1 Avaliação do banco de dados
+
+A camada `project/src/infrastructure/database/` e os repositórios SQLite/SQLAlchemy passaram a fazer parte do escopo oficial da varredura de produção:
+
+- `catalog_repository.py`, `offer_repository.py`, `sqlite_db.py` e os modelos SQLAlchemy foram analisados pelo Bandit sem alertas.
+- A dependência `SQLAlchemy==2.1.9` foi instalada no venv isolado, congelada e auditada pelo pip-audit sem vulnerabilidades conhecidas.
+- O Safety também detectou `SQLAlchemy==2.1.9` em `project/requirements.txt` e não encontrou problemas.
+- A suíte `project/tests/test_sqlite_repositories.py` foi incluída na varredura completa, adicionando **46 LOC de teste** e **5 alertas `B101`**, todos ruído de `assert`.
+
+### 2.2 Avaliação dos novos testes
+
+A lacuna apontada na segunda avaliação — `project/tests` fora de escopo — foi fechada:
+
+- **8 arquivos de teste**, **420 LOC**, incluindo `conftest.py`, `fakes/`, testes de domínio, ofertas legadas, combos, recibo e persistência.
+- **34 alertas `B101`**, semanticamente idênticos ao ruído de 7 alertas da linha de base, porém proporcionais à suíte atual de 30 testes.
+- Nenhum alerta de severidade `Medium` ou `High` foi encontrado em testes ou produção.
 
 ---
 
-## 3. Resultados Detalhados da Terceira Avaliação
+## 3. Metodologia e Ambiente
 
-### 3.1 Análise Estática de Código (SAST) - Bandit
+### 3.1 Identificação do ambiente
 
-#### 3.1.1 Código de Produção
+Registro completo em [`after_ambiente.txt`](security/after_ambiente.txt).
 
-```text
-Run started: 2026-11-24 21:43:00.388616+00:00
-Test results: No issues identified.
-Total lines of code: 647 | #nosec: 0 | regras desabilitadas: 0
-Severidade: Undefined 0, Low 0, Medium 0, High 0
-Confiança:  Undefined 0, Low 0, Medium 0, High 0
+| Propriedade | Valor |
+| :--- | :--- |
+| **Data/Hora (UTC)** | 2026-11-25 22:29:43 UTC |
+| **Sistema Operacional** | Linux 7.0.0-43-generic (#43~24.04.1-Ubuntu SMP x86_64) |
+| **Shell** | `/bin/bash` |
+| **Proxy HTTP/HTTPS** | nenhum |
+| **Branch Git** | `feature/reavaliacao_3` |
+| **Commit Git** | `8db0849895ba641eb07eeb6a6617211a3b7bdb45` |
+| **Diretório Raiz dos Comandos** | `/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata` |
+
+### 3.2 Versões das ferramentas
+
+| Ferramenta | Versão | Ambiente |
+| :--- | :--- | :--- |
+| **Conda** | 26.7.1 | `/home/beatriz/miniconda3/condabin/conda` |
+| **Python** | 3.12.16 | `supermarket-sec` |
+| **pip** | 26.2.2 | `supermarket-sec` |
+| **Bandit** | 1.9.4 | `supermarket-sec` |
+| **pip-audit** | 2.10.1 | venv temporário `/tmp/opencode/security-third-venv` |
+| **Safety** | 3.8.1 | `supermarket-sec`, autenticado |
+
+### 3.3 Preparação para pip-audit
+
+Para isolar exatamente as dependências declaradas pelo produto, foi criado um venv temporário, instalados os requisitos e gerado o congelamento **antes** da instalação do próprio `pip-audit`:
+
+```bash
+python3 -m venv /tmp/opencode/security-third-venv
+/tmp/opencode/security-third-venv/bin/python -m pip install -r project/requirements.txt
+/tmp/opencode/security-third-venv/bin/python -m pip freeze \
+  > docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt
+/tmp/opencode/security-third-venv/bin/python -m pip install pip-audit==2.10.1
 ```
 
-- **Código de saída:** `0` (sucesso).
-- **Evidência:** [after_bandit_src.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.txt).
+Pacotes congelados: `iniconfig==2.3.1`, `packaging==26.4`, `pluggy==1.7.0`, `Pygments==2.21.0`, `pytest==9.2.0`, `SQLAlchemy==2.1.9`, `typing_extensions==4.16.0`.
 
-#### 3.1.2 Varredura Completa (produção + testes)
+### 3.4 Autenticação do Safety
 
-- **Total de linhas analisadas:** 973 (`project/main.py`: 48 LOC; `project/src`: 599 LOC; `project/tests`: 326 LOC).
-- **Métricas por severidade:** `High: 0`, `Medium: 0`, `Low: 29`, `Undefined: 0`.
-- **Métricas por confiança:** `High: 29`, `Medium: 0`, `Low: 0`, `Undefined: 0`.
-- **Arquivos com achados:** todos os 29 alertas são `B101:assert_used` (CWE-703) em arquivos de teste:
+A CLI iniciou a rodada sem autenticação, conforme registrado em [`after_safety_tentativa.txt`](security/after_safety_tentativa.txt). O comando informado ao usuário foi:
 
-| Arquivo de Teste | LOC | Alertas `B101` | Trecho Representativo |
+```bash
+conda run -n supermarket-sec python -m safety auth login
+```
+
+Após a autenticação, o status foi confirmado em [`after_safety_auth_status.txt`](security/after_safety_auth_status.txt):
+
+```text
+Authenticated as beatrizestevez29@gmail.com
+```
+
+---
+
+## 4. Resultados Detalhados
+
+### 4.1 Análise Estática de Código — Bandit
+
+Comandos executados a partir da raiz do repositório:
+
+```bash
+conda run -n supermarket-sec python -m bandit -r project/src project/main.py \
+  -f txt -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.txt
+conda run -n supermarket-sec python -m bandit -r project/src project/main.py \
+  -f json -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.json -q
+conda run -n supermarket-sec python -m bandit -r project -x project/.approval_tests_temp \
+  -f txt -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.txt
+conda run -n supermarket-sec python -m bandit -r project -x project/.approval_tests_temp \
+  -f json -o docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.json -q
+```
+
+#### 4.1.1 Produção
+
+- **Código de saída:** `0`
+- **Arquivos analisados:** 26 (`project/main.py` + 25 arquivos em `project/src/`)
+- **LOC:** 732
+- **`#nosec`:** 0
+- **Severidade:** `High: 0`, `Medium: 0`, `Low: 0`, `Undefined: 0`
+- **Confiança:** `High: 0`, `Medium: 0`, `Low: 0`, `Undefined: 0`
+- **Evidências:** [`after_bandit_src.txt`](security/after_bandit_src.txt), [`after_bandit_src.json`](security/after_bandit_src.json)
+
+> **Diagnóstico:** nenhuma fragilidade estática detectada, inclusive na nova camada de persistência e nos repositórios SQLite/SQLAlchemy.
+
+#### 4.1.2 Projeto completo
+
+- **Código de saída:** `1` — esperado, pois o Bandit retorna `1` quando encontra alertas `B101`.
+- **LOC:** 1152 (732 produção + 420 testes)
+- **Severidade:** `High: 0`, `Medium: 0`, `Low: 34`, `Undefined: 0`
+- **Confiança:** `High: 34`, `Medium: 0`, `Low: 0`, `Undefined: 0`
+- **Evidências:** [`after_bandit_all.txt`](security/after_bandit_all.txt), [`after_bandit_all.json`](security/after_bandit_all.json)
+
+| Arquivo de Teste | LOC | Alertas `B101` | Classificação |
 | :--- | ---: | ---: | :--- |
-| `project/tests/test_combo_discount.py` | 139 | 13 | `assert out.total_discount == pytest.approx(expected_discount)` (linhas 54, 55, 94-96, 124-125, 133-135, 163-165) |
-| `project/tests/test_domain_entities.py` | 40 | 5 | `assert receipt.total_price() == pytest.approx(2.00)` (linhas 25, 47, 56-58) |
-| `project/tests/test_legacy_offers.py` | 90 | 10 | `assert out.total_price == pytest.approx(0.99)` (linhas 21-22, 27-28, 54-55, 71-72, 107-108) |
-| `project/tests/test_receipt_and_checkout.py` | 43 | 1 | `assert receipt_text == expected` (linha 51) |
-| `project/tests/conftest.py` | 14 | 0 | — (apenas fixtures) |
+| `project/tests/test_combo_discount.py` | 139 | 13 | Falso positivo / ruído de `pytest` |
+| `project/tests/test_domain_entities.py` | 40 | 5 | Falso positivo / ruído de `pytest` |
+| `project/tests/test_legacy_offers.py` | 90 | 10 | Falso positivo / ruído de `pytest` |
+| `project/tests/test_receipt_and_checkout.py` | 43 | 1 | Falso positivo / ruído de `pytest` |
+| `project/tests/test_sqlite_repositories.py` | 46 | 5 | Falso positivo / ruído de `pytest` |
+| `project/tests/conftest.py`, `fakes/` | 62 | 0 | Sem achados |
 
-**Diagnóstico:** o uso de `assert` é a forma padrão de verificação do `pytest`, portanto os 29 alertas são **falso positivo / ruído de teste**, semelhantes aos 7 alertas da linha de base. Nenhum alerta foi encontrado em `project/src` ou `project/main.py`.
+**Diagnóstico:** os 34 alertas são `B101:assert_used` (CWE-703), decorrentes do uso idiomático de `assert` em suítes `pytest`. Não há achados em `project/src` ou `project/main.py`.
 
-#### 3.1.3 Verificação complementar após a integração do banco
+### 4.2 Auditoria de Dependências — pip-audit
 
-Os artefatos arquivados foram gerados antes do merge da persistência SQLite (commit `3f395fa`). Uma repetição somente leitura das mesmas varreduras sobre o estado atual do branch confirmou a continuidade do resultado:
+Comandos executados:
 
-| Escopo | LOC | Achados Reais | Alertas `B101` (testes) |
-| :--- | ---: | ---: | ---: |
-| Produção (`project/src` + `project/main.py`, incluindo `infrastructure/database/`) | **732** | **0** | 0 |
-| Completo (`project/`) | **1152** | **0** | **34** (13 + 5 + 10 + 1 + 5 em `test_sqlite_repositories.py`) |
+```bash
+/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+  -r docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt \
+  --no-deps -f json \
+  -o docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.json
+/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+  -r docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt \
+  --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.txt
+/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+  -r project/requirements.txt --no-deps -f json \
+  -o docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit_requirements.json
+/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+  -r project/requirements.txt --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit_requirements.txt
+```
 
-O incremento de 85 LOC em produção corresponde aos arquivos `catalog_repository.py`, `offer_repository.py`, `sqlite_db.py` e modelos SQLAlchemy; nenhum deles gerou alerta estático.
+- **Código de saída:** `0` em todas as quatro execuções
+- **Saída textual:** `No known vulnerabilities found`
+- **Dependências listadas no JSON:** 6, todas com `vulns: []`
+- **Correções sugeridas:** `0`
+- **Evidências:** [`after_pip_audit.txt`](security/after_pip_audit.txt), [`after_pip_audit.json`](security/after_pip_audit.json), [`after_pip_audit_requirements.txt`](security/after_pip_audit_requirements.txt), [`after_pip_audit_requirements.json`](security/after_pip_audit_requirements.json)
 
-### 3.2 Auditoria de Dependências (SCA) - pip-audit
-
-Arquivo congelado analisado: [after_pip_freeze.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt).
-
-| Pacote | Versão Congelada | Vulnerabilidades no JSON |
+| Pacote | Versão | Vulnerabilidades |
 | :--- | :---: | :---: |
 | `iniconfig` | 2.3.1 | 0 |
-| `packaging` | 26.4 | não listada no JSON (sem achados) |
 | `pluggy` | 1.7.0 | 0 |
-| `Pygments` | 2.21.0 | 0 |
+| `pygments` | 2.21.0 | 0 |
 | `pytest` | 9.2.0 | 0 |
+| `sqlalchemy` | 2.1.9 | 0 |
+| `typing-extensions` | 4.16.0 | 0 |
 
-- **Saída textual:** `No known vulnerabilities found`.
-- **JSON:** `{"dependencies": [4 entradas com "vulns": []], "fixes": []}`.
-- **Avisos do pip-audit:** o uso de `--no-deps` é suportado, porém recomenda-se o hash completo das dependências fixadas (`pip-compile`).
-- **Evidências:** [after_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.txt) e [after_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.json).
+> **Observação:** o `after_pip_freeze.txt` registrou também `packaging==26.4`; o JSON estruturado do pip-audit relacionou as 6 dependências acima. Em nenhuma das saídas houve vulnerabilidade conhecida. O aviso padrão sobre `--no-deps` e o uso recomendado de hashes foi emitido, mas não representa achado de segurança.
 
-**Ressalva de escopo:** o congelamento arquivado não inclui `SQLAlchemy`, embora o `project/requirements.txt` atual o declare como `SQLAlchemy==2.1.9`. A verificação complementar executada sobre esse arquivo (com `--no-deps`) retornou igualmente `No known vulnerabilities found`, cobrindo a dependência de produção introduzida pelo banco de dados.
+### 4.3 Auditoria com Safety
 
-### 3.3 Auditoria com Safety
+Comandos executados:
 
-O Safety 3.8.1 foi invocado, mas a sessão não estava autenticada. A saída registrada foi:
-
-```text
-Please login or register Safety CLI (free forever) to scan and secure your projects with Safety
-(R)egister for a free account in 30 seconds, or (L)ogin with an existing account to continue (R/L):
-Unhandled exception happened: EOF when reading a line
+```bash
+conda run -n supermarket-sec python -m safety scan --target project \
+  2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.txt
+conda run -n supermarket-sec python -m safety scan --target project --output json \
+  > docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.json
 ```
 
-- **Resultado:** **não executado** (interrompido por ausência de login interativo).
-- **Evidência:** [after_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.txt).
-- **Diferença em relação à segunda avaliação:** na reavaliação anterior houve login (`beatrizestevez29@gmail.com`) e o retorno foi `Tested 0 dependencies ... 0 security issues found`. Nesta rodada não há JSON de Safety na pasta de evidências, portanto o item permanece como **limitação operacional**, não como achado de vulnerabilidade.
+- **Código de saída:** `0`
+- **Conta:** `beatrizestevez29@gmail.com`
+- **Projeto:** `supermarketreceipt-refactoring-kata`
+- **Branch:** `feature/reavaliacao_3`
+- **Política:** buscada da Safety Platform (`source: cloud`)
+- **Arquivo detectado:** `project/requirements.txt`
+- **Dependências testadas:** 2
+- **Resultado:** `0 security issues found, 0 fixes suggested`
+- **Evidências:** [`after_safety.txt`](security/after_safety.txt), [`after_safety.json`](security/after_safety.json), [`after_safety_json_stderr.txt`](security/after_safety_json_stderr.txt)
+
+| Dependência | Especificação | Problemas conhecidos |
+| :--- | :--- | :---: |
+| `sqlalchemy` | `SQLAlchemy==2.1.9` | 0 |
+| `pytest` | `pytest==9.2.0` | 0 |
+
+### 4.4 Sanidade funcional
+
+```bash
+cd project
+/tmp/opencode/security-third-venv/bin/python -m pytest -q
+```
+
+- **Código de saída:** `0`
+- **Resultado:** `30 passed in 0.37s`
+- **Evidência:** [`after_pytest.txt`](security/after_pytest.txt)
 
 ---
 
-## 4. Comparativo: Linha de Base vs. Reavaliação v1 vs. Terceira Avaliação v2
+## 5. Comparação entre as Avaliações
 
-| Métrica / Dimensão de Análise | 1ª Avaliação (`python_pytest`) | 2ª Avaliação (`project/src`) | 3ª Avaliação (`project/tests` + banco) | Variação / Impacto |
+| Métrica / Dimensão | 1ª Avaliação (`python_pytest`) | 2ª Avaliação (`project/src`) | 3ª Avaliação (`project/` completo) | Variação / Impacto |
 | :--- | :--- | :--- | :--- | :--- |
-| **LOC em produção** | 133 (212 com testes) | 545 (22 arquivos) | **647** (artefato) / **732** (pós-banco) | Crescimento esperado pela segregação em camadas e pela persistência; **0 achados reais** |
-| **LOC em testes** | 79 | **Fora de escopo** | **326** (artefato) / **420** (pós-banco, incluindo `fakes/`) | Lacuna da segunda avaliação fechada; suíte de 30 testes no estado atual |
-| **Achados Bandit em produção** | 0 (saída `0`) | 0 (saída `0`) | **0** (saída `0`) | Nenhuma fragilidade estática no código de negócio nem no acesso a dados |
-| **Achados Bandit em testes** | 7 `B101` (Low/High) | Não avaliados | **29 `B101`** (artefato) / **34 `B101`** (pós-banco) | Aumento proporcional à suíte; ruído de `pytest`, não vulnerabilidade |
-| **Severidade High/Medium** | 0 | 0 | **0 / 0** | Nenhum achado explorável nas três avaliações |
-| **Dependências externas em runtime** | Indiretas (`requests`, `urllib3==2.0.6`) | Zero (Standard Library) | **`SQLAlchemy==2.1.9`** (SQLite) + `pytest==9.2.0` (dev) | Banco traz 1 dependência de produção, porém fixada e sem CVEs conhecidos |
-| **Vulnerabilidades conhecidas (pip-audit)** | 16 no `urllib3` | 0 no escopo avaliado | **0** (5 pacotes congelados; 0 também em `SQLAlchemy==2.1.9`) | Risco de cadeia de suprimentos do legado eliminado |
-| **Alertas do Safety** | 1 alerta de requisito não pinado (ignorado por política) | 0 (autenticado) | **Não executado** (`EOF`, sem token) | Limitação de autenticação, não regressão de segurança |
+| **LOC em produção** | 133 (212 com testes) | 545 (22 arquivos) | **732** (26 arquivos, com banco) | Crescimento por camadas, persistência e `main.py`; **0 achados reais** |
+| **LOC em testes** | 79 | Fora de escopo | **420** (8 arquivos) | Lacuna da 2ª avaliação fechada |
+| **Achados Bandit em produção** | 0 | 0 | **0** | Nenhuma fragilidade estática no negócio ou acesso a dados |
+| **Achados Bandit em testes** | 7 `B101` | Não avaliados | **34 `B101`** | Aumento proporcional à suíte; ruído de `pytest`, não vulnerabilidade |
+| **Severidade High/Medium** | 0 / 0 | 0 / 0 | **0 / 0** | Nenhum achado explorável nas três avaliações |
+| **Dependências externas em runtime** | Indiretas: `requests` e `urllib3==2.0.6` | Zero (somente stdlib no escopo avaliado) | **`SQLAlchemy==2.1.9`** + `pytest==9.2.0` (dev) | Banco adiciona 1 dependência de produção, fixada e sem CVEs |
+| **Vulnerabilidades pip-audit no escopo do produto** | 16 no `urllib3` | 0 no escopo de `src` | **0** (6 dependências listadas) | Risco transitivo do legado eliminado |
+| **Vulnerabilidades no ambiente da ferramenta** | `filelock` fora do escopo | 29 (`filelock` + `urllib3`) no ambiente | **0** no venv isolado de requisitos | Isolamento evitou contaminação por dependências do Safety |
+| **Safety** | 1 alerta de requisito não pinado, ignorado por política | 0 problemas, **0 dependências testadas** (autenticado) | **0 problemas, 2 dependências testadas** (autenticado) | Maior cobertura: `requirements.txt` agora é lido e validado |
+| **Autenticação Safety** | Concluída | Concluída após expiração | **Concluída nesta rodada** | Limitação da versão anterior resolvida |
 
-### Comparativo direto (2ª → 3ª avaliação)
+### Comparativo direto 2ª → 3ª avaliação
 
-- **Escopo ampliado:** de 545 LOC somente de produção para 973 LOC (produção + testes + `main.py`), chegando a 1152 LOC com o banco integrado.
-- **Persistência:** de repositórios em memória para SQLite/SQLAlchemy, com acesso parametrizado via ORM (`Session.get`, `Session.merge`, `query(...).all()`), sem concatenação de SQL — reduzindo o risco de injeção.
-- **Validação de dados:** inclusão da verificação de preço negativo antes de gravar no catálogo (`catalog_repository.py:20-21`), evitando persistência financeira inconsistente.
-- **Testes de integração:** novo arquivo `test_sqlite_repositories.py` cobre cadastro, leitura, ofertas/combos e checkout integrado ao banco.
-
----
-
-## 5. Pontos Fortes e Melhorias de Segurança Após as Mudanças
-
-### 1. Fechamento da Lacuna de Cobertura dos Testes
-A segunda avaliação excluiu explicitamente `project/tests`. A terceira analisou 326 LOC de testes (420 no estado atual, incluindo os fakes), confirmando que toda a nova suíte — domínio, ofertas legadas, combos, recibo e persistência — está livre de padrões inseguros além do `assert` idiomático do `pytest`.
-
-### 2. Persistência Segura com SQLAlchemy
-- A camada `src/infrastructure/database/` usa `create_engine`, `Base.metadata.create_all` e `Session`, mantendo o domínio e os casos de uso isolados da infraestrutura (DIP).
-- As consultas utilizam identificadores e parâmetros do ORM, e não strings SQL montadas dinamicamente; portanto não há vetor de injeção SQL nos repositórios atuais.
-- A validação `if price < 0: raise ValueError(...)` antes do `merge`/`commit` impede a persistência de valores financeiros inválidos.
-
-### 3. Superfície de Ataque Controlada
-A dependência transitiva `urllib3==2.0.6` (16 CVEs) foi removida junto com `approvaltests`. O único pacote de produção adicionado, `SQLAlchemy==2.1.9`, está fixado em versão específica e foi confirmado sem vulnerabilidades conhecidas na verificação complementar.
-
-### 4. Ruído de SAST Compreendido e Documentado
-Os 29 (ou 34) alertas `B101` têm natureza conhecida e foram triados como falso positivo. Caso se deseje uma esteira 100% limpa, basta desabilitar `B101` somente para `project/tests` na configuração do Bandit, sem alterar as regras de produção.
-
-### 5. Conformidade com a Política de Evidências
-Todos os artefatos brutos (TXT e JSON) foram preservados na pasta `docs/security/terceira_avaliacao_refatorado_v2/security/`, permitindo auditoria independente e comparabilidade com as avaliações anteriores.
+- **Escopo:** de 545 LOC somente de produção para **1152 LOC** cobrindo produção, testes e ponto de entrada.
+- **Banco de dados:** repositórios em memória evoluíram para SQLite/SQLAlchemy com acesso parametrizado via ORM; nenhuma concatenação dinâmica de SQL foi detectada.
+- **Validação:** `catalog_repository.py` valida preço negativo antes da persistência, evitando dados financeiros inválidos.
+- **Testes integrados:** `test_sqlite_repositories.py` cobre cadastro, leitura, ofertas/combos e checkout com banco.
+- **Cadeia de suprimentos:** `approvaltests`/`urllib3==2.0.6` removidos; `SQLAlchemy==2.1.9` adicionado com versão fixada e 0 vulnerabilidades conhecidas.
 
 ---
 
-## 6. Ressalvas e Recomendações Finais
+## 6. Conclusão e Recomendações
 
-1. **Regerar os artefatos após o merge do banco:** os arquivos arquivados datam de 2026-11-24 21:43 UTC e não incluem `SQLAlchemy`, `src/infrastructure/database/` nem `test_sqlite_repositories.py`. Recomenda-se salvar uma nova rodada completa na mesma pasta para que o registro oficial reflita os 732/1152 LOC atuais.
-2. **Restabelecer a autenticação do Safety:** repetir o scan com token válido (como na segunda avaliação) e arquivar o JSON correspondente; enquanto isso, o item permanece inconclusivo.
-3. **Endurecer o pipeline de dependências:** manter versões fixadas e gerar hashes (`pip-compile --generate-hashes`) para eliminar o aviso do `pip-audit` sobre `--no-deps`.
-4. **Cuidados operacionais com o SQLite:** restringir permissões do arquivo `project/supermarket.db`, não versionar dados de produção e validar a origem de `db_url` caso a aplicação passe a aceitar configuração externa.
+A reexecução da terceira avaliação confirmou que o estado atual do branch `feature/reavaliacao_3` não apresenta vulnerabilidades identificadas pelas três ferramentas em seus escopos aplicáveis. A diferença mais relevante em relação à rodada anterior é a **inclusão oficial do banco de dados e dos novos testes**, além da **conclusão bem-sucedida do Safety com autenticação**.
+
+Recomendações:
+
+1. Manter versões fixadas em `project/requirements.txt`.
+2. Gerar hashes com `pip-compile --generate-hashes` para eliminar o aviso sobre `--no-deps`.
+3. Restringir permissões do arquivo `project/supermarket.db` e não versionar dados de produção.
+4. Validar a origem de `db_url` caso a aplicação passe a aceitar configuração externa.
+5. Opcionalmente, desabilitar `B101` apenas para `project/tests` na configuração do Bandit, sem alterar as regras de produção, caso se deseje uma esteira SAST com saída `0`.
 
 ---
 
-## 7. Inventário de Evidências da Terceira Avaliação
+## 7. Inventário de Evidências
 
-Todos os arquivos brutos foram preservados em `docs/security/terceira_avaliacao_refatorado_v2/security/`:
-
-- [after_bandit_src.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_src.txt): varredura do Bandit em `project/src` + `project/main.py` (647 LOC, 0 achados).
-- [after_bandit_all.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.txt): saída textual da varredura completa (973 LOC, 29 alertas `B101`).
-- [after_bandit_all.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_bandit_all.json): métricas estruturadas por arquivo e detalhamento dos 29 achados.
-- [after_pip_freeze.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_freeze.txt): lista de pacotes congelados antes da auditoria.
-- [after_pip_audit.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.txt): saída textual com `No known vulnerabilities found`.
-- [after_pip_audit.json](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_pip_audit.json): estrutura JSON com as dependências avaliadas e `fixes: []`.
-- [after_safety.txt](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/security/after_safety.txt): registro da tentativa de scan interrompida por ausência de autenticação (não há JSON de Safety nesta rodada).
-- [relatorio_terceira_avaliacao_seguranca.md](file:///home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/docs/security/terceira_avaliacao_refatorado_v2/relatorio_terceira_avaliacao_seguranca.md): este relatório consolidado e comparativo.
+| Arquivo | Conteúdo |
+| :--- | :--- |
+| [`after_ambiente.txt`](security/after_ambiente.txt) | Data/hora, SO, shell, proxy, branch, commit, versões das ferramentas |
+| [`after_pip_freeze.txt`](security/after_pip_freeze.txt) | Pacotes congelados do venv isolado antes da instalação do pip-audit |
+| [`after_pip_audit.txt`](security/after_pip_audit.txt) | Saída textual do pip-audit sobre o congelamento |
+| [`after_pip_audit.json`](security/after_pip_audit.json) | JSON estruturado do pip-audit sobre o congelamento |
+| [`after_pip_audit_requirements.txt`](security/after_pip_audit_requirements.txt) | Saída textual do pip-audit sobre `project/requirements.txt` |
+| [`after_pip_audit_requirements.json`](security/after_pip_audit_requirements.json) | JSON estruturado do pip-audit sobre `project/requirements.txt` |
+| [`after_bandit_src.txt`](security/after_bandit_src.txt) | Bandit em `project/src` + `project/main.py`: 732 LOC, 0 achados |
+| [`after_bandit_src.json`](security/after_bandit_src.json) | Métricas estruturadas da varredura de produção |
+| [`after_bandit_all.txt`](security/after_bandit_all.txt) | Bandit em `project/`: 1152 LOC, 34 `B101` |
+| [`after_bandit_all.json`](security/after_bandit_all.json) | Métricas estruturadas e detalhamento dos 34 alertas |
+| [`after_safety_tentativa.txt`](security/after_safety_tentativa.txt) | Registro da verificação inicial sem autenticação |
+| [`after_safety_auth_status.txt`](security/after_safety_auth_status.txt) | Confirmação da autenticação do Safety |
+| [`after_safety.txt`](security/after_safety.txt) | Saída textual do scan autenticado em `project/` |
+| [`after_safety.json`](security/after_safety.json) | Relatório estruturado do Safety autenticado |
+| [`after_safety_json_stderr.txt`](security/after_safety_json_stderr.txt) | Avisos de depreciação emitidos pela CLI do Safety |
+| [`after_pytest.txt`](security/after_pytest.txt) | Sanidade funcional: 30 testes aprovados |
+| [`relatorio_terceira_avaliacao_seguranca.md`](relatorio_terceira_avaliacao_seguranca.md) | Este relatório consolidado |

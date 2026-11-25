@@ -1,11 +1,29 @@
-/tmp/sec-venv/lib/python3.13/site-packages/safety/auth/main.py:5: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+/home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/safety/auth/main.py:5: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
 It will be compatible before version 2.0.0.
   from authlib.jose.errors import ExpiredTokenError
-/tmp/sec-venv/lib/python3.13/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+/home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
   from ._compat import httpx2
+Safety 3.8.1 scanning 
+/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/p
+roject
+2026-11-25 22:33:29 UTC
 
-Please login or register Safety CLI (free forever) to scan and secure your 
-projects with Safety
+Account: bea, beatrizestevez29@gmail.com 
+Project: supermarketreceipt-refactoring-kata
+ Git branch: feature/reavaliacao_3
+ Environment: Stage.development
+ Scan policy: fetched from Safety Platform, ignoring any local Safety CLI policy
+files
 
-(R)egister for a free account in 30 seconds, or (L)ogin with an existing account
-to continue (R/L): Unhandled exception happened: EOF when reading a line
+Python detected. Found 1 Python requirement file
+
+✅ requirements.txt: No issues found.
+
+Tested 2 dependencies for security issues using policy fetched from Safety 
+Platform
+0 security issues found, 0 fixes suggested.
+0 fixes suggested, resolving 0 vulnerabilities.
+
+Project dashboard: 
+https://platform.safetycli.com/codebases/supermarketreceipt-refactoring-kata/fin
+dings?branch=feature/reavaliacao_3
