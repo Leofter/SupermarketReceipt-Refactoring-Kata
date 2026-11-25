@@ -2,12 +2,8 @@
 
 import pytest
 
-from src.adapters.gateways.repositories.memory_catalog_repository import (
-    MemoryCatalogRepository,
-)
-from src.adapters.gateways.repositories.memory_offer_repository import (
-    MemoryOfferRepository,
-)
+from tests.fakes.memory_catalog_repository import MemoryCatalogRepository
+from tests.fakes.memory_offer_repository import MemoryOfferRepository
 
 
 @pytest.fixture
