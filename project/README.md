@@ -7,17 +7,17 @@ Modernização incremental do sistema legado de supermercado (`python_pytest/`),
 ## 1. Ambiente e Dependências
 
 - **Linguagem:** Python `3.9+` (validado em Python `3.13.13`).
-- **Dependências de produção:** nenhuma (usa apenas a biblioteca padrão do Python).
+- **Dependências de produção:** `SQLAlchemy==2.1.9` (persistência SQLite via `sqlite3` padrão).
 - **Dependências de desenvolvimento/testes:**
-  - `pytest` (execução dos testes automatizados)
+  - `pytest==9.2.0` (execução dos testes automatizados)
   - `pytest-cov` (opcional, para relatório de cobertura)
   - `bandit`, `pip-audit` e `safety` (opcional, para auditorias de segurança)
 
-Instalação opcional das ferramentas de teste em um ambiente virtual:
+Instalação das dependências em um ambiente virtual:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install pytest pytest-cov
+pip install -r requirements.txt
 ```
 
 ---
@@ -47,12 +47,13 @@ Para rodar com cobertura de código:
 pytest -v --cov=src --cov-report=term-missing
 ```
 
-- **Resultado atual:** **`28 passed`** e **`95%` de cobertura global**.
+- **Resultado atual:** **`30 passed`** e **`95%` de cobertura global** (`434` instruções).
 - **O que os testes cobrem:**
   - Invariantes e cálculos das entidades (`Product`, `ProductQuantity`, `Discount`, `ShoppingCart`, `Receipt`).
   - Regressão das ofertas legadas (`3 for 2`, desconto percentual em `KILO`, `2 for amount` e `5 for amount`, carrinho vazio/sem ofertas).
   - Combos de 10% (combo completo, incompleto, repetido, produtos excedentes, múltiplos combos e convivência sem desconto duplicado com ofertas preexistentes).
   - Formatação do recibo de 40 colunas via `CheckoutController` e `ReceiptPresenter`.
+  - Persistência SQLite + SQLAlchemy (`CatalogRepository`, `OfferRepository`, validação de preço negativo e checkout integrado).
 
 ---
 
@@ -62,11 +63,11 @@ Foram executadas auditorias **antes** (sobre o legado) e **depois** (sobre `proj
 
 | Ferramenta | Resultado no Projeto Refatorado | Observação |
 | :--- | :--- | :--- |
-| **Bandit `1.9.4`** | **0 alertas** em produção (`647` linhas) | Nos testes, apenas `B101` (`assert` do `pytest`), classificado como ruído esperado. |
-| **pip-audit `2.10.1`** | **0 vulnerabilidades** (`5` pacotes auditados) | Eliminação das `16` CVEs transitivas de `urllib3` do legado ao remover `approvaltests`. |
+| **Bandit `1.9.4`** | **0 alertas** em produção (`732` linhas) | Nos testes, apenas `B101` (`assert` do `pytest`), classificado como ruído esperado. |
+| **pip-audit `2.10.1`** | **0 vulnerabilidades** (`SQLAlchemy==2.1.9` e `pytest==9.2.0`) | Eliminação das `16` CVEs transitivas de `urllib3` do legado ao remover `approvaltests`. |
 | **Safety `3.8.1`** | Exigiu login interativo no ambiente (`EOF`) | Limitação registrada; dependências cobertas integralmente pelo `pip-audit`. |
 
-Os relatórios e evidências completas estão em `docs/security/`.
+As evidências completas estão em `docs/security/terceira_avaliacao_refatorado_v2/`.
 
 ---
 
@@ -74,8 +75,9 @@ Os relatórios e evidências completas estão em `docs/security/`.
 
 ```text
 project/
-├── main.py                              # Ponto de entrada e montagem das dependências
+├── main.py                              # Ponto de entrada e montagem das dependências (SQLite)
 ├── pytest.ini                           # Configuração do pytest
+├── requirements.txt                     # Dependências fixadas (SQLAlchemy, pytest)
 ├── src/
 │   ├── domain/
 │   │   ├── entities/                    # Product, ShoppingCart, Discount, Receipt
@@ -89,15 +91,19 @@ project/
 │   ├── adapters/
 │   │   ├── controller/                  # CheckoutController
 │   │   ├── presenter/                   # ReceiptPresenter (formatação em 40 colunas)
-│   │   └── gateways/repositories/       # MemoryCatalogRepository, MemoryOfferRepository
+│   │   └── gateways/repositories/       # CatalogRepository, OfferRepository (SQLite + SQLAlchemy)
 │   └── infrastructure/
-│       └── database/                    # Reservado para persistência futura (ex.: SQLite)
+│       └── database/
+│           ├── sqlite_db.py             # Sessão e criação das tabelas SQLite
+│           └── model/                   # Base, ProductModel, OfferModel
 └── tests/
     ├── conftest.py                      # Fixtures compartilhadas
+    ├── fakes/                           # MemoryCatalogRepository, MemoryOfferRepository
     ├── test_domain_entities.py          # Invariantes e entidades
     ├── test_legacy_offers.py            # Regressão das ofertas antigas
     ├── test_combo_discount.py           # Combos, bordas e convivência
-    └── test_receipt_and_checkout.py     # Ponta a ponta (Controller -> Presenter)
+    ├── test_receipt_and_checkout.py     # Ponta a ponta (Controller -> Presenter)
+    └── test_sqlite_repositories.py      # Integração SQLite + SQLAlchemy
 ```
 
 ---

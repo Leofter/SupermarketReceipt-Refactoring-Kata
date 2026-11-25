@@ -17,6 +17,8 @@ class CatalogRepository(SupermarketCatalog):
 
     def add_product(self, product: Product, price: float) -> None:
         """Insere ou atualiza um produto e seu preço unitário."""
+        if price < 0:
+            raise ValueError("price não pode ser negativo.")
         model = ProductModel(
             name=product.name,
             unit=product.unit.name,

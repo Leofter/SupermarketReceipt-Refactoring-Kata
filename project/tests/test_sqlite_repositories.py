@@ -38,6 +38,9 @@ def test_sqlite_catalog_persists_and_finds_products(sqlite_repos):
     with pytest.raises(KeyError):
         catalog.unit_price(Product("inexistente", ProductUnit.EACH))
 
+    with pytest.raises(ValueError):
+        catalog.add_product(escova, -1.0)
+
 
 def test_sqlite_offer_repository_and_checkout_with_combo(sqlite_repos):
     catalog, offer_gateway = sqlite_repos
