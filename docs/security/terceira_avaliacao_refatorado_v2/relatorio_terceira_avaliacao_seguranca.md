@@ -6,7 +6,7 @@
 **Commit Git de Referência do Código Avaliado:** `8db0849895ba641eb07eeb6a6617211a3b7bdb45`
 **Alvo da Avaliação:** `project/` por completo — `project/src`, `project/tests`, `project/main.py` e `project/requirements.txt`
 **Pasta de Evidências:** `docs/security/terceira_avaliacao_refatorado_v2/`
-**Ambiente:** `supermarket-sec` (Python 3.12.16) para Bandit/Safety; venv temporário para isolar requisitos no pip-audit
+**Ambiente:** `supermarket-sec` (Python 3.12.16) para todas as ferramentas, incluindo pip-audit
 
 ---
 
@@ -52,7 +52,7 @@ Resultados consolidados:
 A camada `project/src/infrastructure/database/` e os repositórios SQLite/SQLAlchemy passaram a fazer parte do escopo oficial da varredura de produção:
 
 - `catalog_repository.py`, `offer_repository.py`, `sqlite_db.py` e os modelos SQLAlchemy foram analisados pelo Bandit sem alertas.
-- A dependência `SQLAlchemy==2.1.9` foi instalada no venv isolado, congelada e auditada pelo pip-audit sem vulnerabilidades conhecidas.
+- A dependência `SQLAlchemy==2.1.9` consta do congelamento e de `project/requirements.txt`, tendo sido auditada pelo pip-audit sem vulnerabilidades conhecidas.
 - O Safety também detectou `SQLAlchemy==2.1.9` em `project/requirements.txt` e não encontrou problemas.
 - A suíte `project/tests/test_sqlite_repositories.py` foi incluída na varredura completa, adicionando **46 LOC de teste** e **5 alertas `B101`**, todos ruído de `assert`.
 
@@ -90,22 +90,14 @@ Registro completo em [`after_ambiente.txt`](after_ambiente.txt).
 | **Python** | 3.12.16 | `supermarket-sec` |
 | **pip** | 26.2.2 | `supermarket-sec` |
 | **Bandit** | 1.9.4 | `supermarket-sec` |
-| **pip-audit** | 2.10.1 | venv temporário `/tmp/opencode/security-third-venv` |
+| **pip-audit** | 2.10.1 | `supermarket-sec` |
 | **Safety** | 3.8.1 | `supermarket-sec`, autenticado |
 
-### 3.3 Preparação para pip-audit
+### 3.3 Entradas do pip-audit
 
-Para isolar exatamente as dependências declaradas pelo produto, foi criado um venv temporário, instalados os requisitos e gerado o congelamento **antes** da instalação do próprio `pip-audit`:
+Foram auditadas duas entradas: o congelamento de dependências [`after_pip_freeze.txt`](after_pip_freeze.txt) e o arquivo declarado pelo produto, `project/requirements.txt`. O congelamento registra as versões resolvidas das dependências diretas e transitivas do produto: `iniconfig==2.3.1`, `packaging==26.4`, `pluggy==1.7.0`, `Pygments==2.21.0`, `pytest==9.2.0`, `SQLAlchemy==2.1.9`, `typing_extensions==4.16.0`.
 
-```bash
-python3 -m venv /tmp/opencode/security-third-venv
-/tmp/opencode/security-third-venv/bin/python -m pip install -r project/requirements.txt
-/tmp/opencode/security-third-venv/bin/python -m pip freeze \
-  > docs/security/terceira_avaliacao_refatorado_v2/after_pip_freeze.txt
-/tmp/opencode/security-third-venv/bin/python -m pip install pip-audit==2.10.1
-```
-
-Pacotes congelados: `iniconfig==2.3.1`, `packaging==26.4`, `pluggy==1.7.0`, `Pygments==2.21.0`, `pytest==9.2.0`, `SQLAlchemy==2.1.9`, `typing_extensions==4.16.0`.
+O pip-audit foi executado diretamente no ambiente Conda `supermarket-sec`, o mesmo usado pelas demais ferramentas.
 
 ### 3.4 Autenticação do Safety
 
@@ -176,17 +168,17 @@ conda run -n supermarket-sec python -m bandit -r project -x project/.approval_te
 Comandos executados:
 
 ```bash
-/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+conda run -n supermarket-sec python -m pip_audit \
   -r docs/security/terceira_avaliacao_refatorado_v2/after_pip_freeze.txt \
   --no-deps -f json \
   -o docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit.json
-/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+conda run -n supermarket-sec python -m pip_audit \
   -r docs/security/terceira_avaliacao_refatorado_v2/after_pip_freeze.txt \
   --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit.txt
-/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+conda run -n supermarket-sec python -m pip_audit \
   -r project/requirements.txt --no-deps -f json \
   -o docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit_requirements.json
-/tmp/opencode/security-third-venv/bin/python -m pip_audit \
+conda run -n supermarket-sec python -m pip_audit \
   -r project/requirements.txt --no-deps 2>&1 | tee docs/security/terceira_avaliacao_refatorado_v2/after_pip_audit_requirements.txt
 ```
 
@@ -235,11 +227,7 @@ conda run -n supermarket-sec python -m safety scan --target project --output jso
 
 ### 4.4 Sanidade funcional
 
-```bash
-cd project
-/tmp/opencode/security-third-venv/bin/python -m pytest -q
-```
-
+- **Execução:** suíte `pytest -q` em `project/`
 - **Código de saída:** `0`
 - **Resultado:** `30 passed in 0.37s`
 - **Evidência:** [`after_pytest.txt`](after_pytest.txt)
@@ -257,7 +245,7 @@ cd project
 | **Severidade High/Medium** | 0 / 0 | 0 / 0 | **0 / 0** | Nenhum achado explorável nas três avaliações |
 | **Dependências externas em runtime** | Indiretas: `requests` e `urllib3==2.0.6` | Zero (somente stdlib no escopo avaliado) | **`SQLAlchemy==2.1.9`** + `pytest==9.2.0` (dev) | Banco adiciona 1 dependência de produção, fixada e sem CVEs |
 | **Vulnerabilidades pip-audit no escopo do produto** | 16 no `urllib3` | 0 no escopo de `src` | **0** (6 dependências listadas) | Risco transitivo do legado eliminado |
-| **Vulnerabilidades no ambiente da ferramenta** | `filelock` fora do escopo | 29 (`filelock` + `urllib3`) no ambiente | **0** no venv isolado de requisitos | Isolamento evitou contaminação por dependências do Safety |
+| **Vulnerabilidades no ambiente da ferramenta** | `filelock` fora do escopo | 29 (`filelock` + `urllib3`) no ambiente | **0** nas dependências auditadas | Escopo restrito aos requisitos do produto, sem contagem de pacotes da ferramenta |
 | **Safety** | 1 alerta de requisito não pinado, ignorado por política | 0 problemas, **0 dependências testadas** (autenticado) | **0 problemas, 2 dependências testadas** (autenticado) | Maior cobertura: `requirements.txt` agora é lido e validado |
 | **Autenticação Safety** | Concluída | Concluída após expiração | **Concluída nesta rodada** | Limitação da versão anterior resolvida |
 
@@ -290,7 +278,7 @@ Recomendações:
 | Arquivo | Conteúdo |
 | :--- | :--- |
 | [`after_ambiente.txt`](after_ambiente.txt) | Data/hora, SO, shell, proxy, branch, commit, versões das ferramentas |
-| [`after_pip_freeze.txt`](after_pip_freeze.txt) | Pacotes congelados do venv isolado antes da instalação do pip-audit |
+| [`after_pip_freeze.txt`](after_pip_freeze.txt) | Versões resolvidas das dependências do produto usadas como entrada do pip-audit |
 | [`after_pip_audit.txt`](after_pip_audit.txt) | Saída textual do pip-audit sobre o congelamento |
 | [`after_pip_audit.json`](after_pip_audit.json) | JSON estruturado do pip-audit sobre o congelamento |
 | [`after_pip_audit_requirements.txt`](after_pip_audit_requirements.txt) | Saída textual do pip-audit sobre `project/requirements.txt` |
