@@ -1,0 +1,18 @@
+Ambiente de Reavaliação de Segurança
+======================================
+Data/Hora (UTC): 2026-11-24 20:15:17 UTC
+Sistema Operacional: Linux 7.0.0-43-generic (#43~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Sat Oct 31 06:52:47 UTC 2)
+Arquitetura: x86_64
+Proxy Configurado: Falso
+Branch Git: feature/security_test_reavaliacao
+Commit Git: 6f0ccb18959baefc8c65185f60d6b2acb920844a
+Alvo da Reavaliação: project/src (e subpastas)
+
+Versões das Ferramentas:
+- Conda: conda 26.7.1
+- Python: Python 3.12.16
+- pip: pip 26.2.2 from /home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/pip (python 3.12)
+- Bandit: __main__.py 1.9.4
+  python version = 3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]
+- pip-audit: pip-audit 2.10.1
+- Safety: safety, version 3.8.1
