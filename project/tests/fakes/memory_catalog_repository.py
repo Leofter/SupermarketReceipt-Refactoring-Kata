@@ -14,6 +14,8 @@ class MemoryCatalogRepository(SupermarketCatalog):
 
     def add_product(self, product: Product, price: float) -> None:
         """Registra ou atualiza o preço unitário de um produto."""
+        if price < 0:
+            raise ValueError("price não pode ser negativo.")
         self._prices[product] = float(price)
 
     def unit_price(self, product: Product) -> float:
