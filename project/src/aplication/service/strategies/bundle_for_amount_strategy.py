@@ -40,3 +40,9 @@ class BundleForAmountStrategy(DiscountStrategy):
             description=f"{self._bundle_size} for {self._bundle_price}",
             amount=discount_amount,
         )
+
+    def consumed_quantities(self, cart: ShoppingCart) -> dict[Product, float]:
+        """Consome apenas os lotes completos de tamanho bundle_size."""
+        quantity = int(cart.product_quantities().get(self._product, 0))
+        consumed = (quantity // self._bundle_size) * self._bundle_size
+        return {self._product: float(consumed)} if consumed > 0 else {}

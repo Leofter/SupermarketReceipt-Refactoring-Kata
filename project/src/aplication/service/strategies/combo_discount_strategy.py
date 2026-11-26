@@ -45,3 +45,13 @@ class ComboDiscountStrategy(DiscountStrategy):
             description=f"Combo {self._percentage}% off",
             amount=discount_amount,
         )
+
+    def consumed_quantities(self, cart: ShoppingCart) -> dict[Product, float]:
+        """Consome 1 unidade de cada produto para cada combo completo."""
+        quantities = cart.product_quantities()
+        complete_combos = min(
+            int(quantities.get(product, 0)) for product in self._products
+        )
+        if complete_combos < 1:
+            return {}
+        return {product: float(complete_combos) for product in self._products}

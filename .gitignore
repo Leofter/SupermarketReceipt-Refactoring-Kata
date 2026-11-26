@@ -8,4 +8,8 @@ out/
 build/
 .gradle/
 .DS_Store
+.venv
+docs/gab**
+**/.approval_tests_temp**
 docs/leo
+.vscode
