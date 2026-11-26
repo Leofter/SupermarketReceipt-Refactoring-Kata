@@ -24,13 +24,21 @@ pip install -r requirements.txt
 
 ## 2. Como Executar
 
-A partir da raiz do repositório ou dentro de `project/`:
+### Modo Terminal (`main.py`)
 ```bash
 cd project
 python3 main.py
 ```
 
-O `main.py` monta o catálogo, registra as ofertas (incluindo combos), processa um carrinho de exemplo e imprime o recibo formatado no terminal.
+O `main.py` inicializa o banco SQLite, cadastra produtos e todas as ofertas (incluindo combos), processa um carrinho de exemplo e imprime o recibo no terminal.
+
+### Interface Gráfica Interativa (`gui.py`)
+```bash
+cd project
+python3 gui.py
+```
+
+Abre o PDV interativo em Tkinter conectado ao mesmo banco SQLite e `CheckoutController`, permitindo adicionar itens, cadastrar novos produtos, testar cenários prontos e visualizar o cupom matricial em tempo real.
 
 ---
 
@@ -75,7 +83,8 @@ As evidências completas estão em `docs/security/terceira_avaliacao_refatorado_
 
 ```text
 project/
-├── main.py                              # Ponto de entrada e montagem das dependências (SQLite)
+├── main.py                              # Ponto de entrada CLI e montagem das dependências (SQLite)
+├── gui.py                               # Interface gráfica interativa em Tkinter 
 ├── pytest.ini                           # Configuração do pytest
 ├── requirements.txt                     # Dependências fixadas (SQLAlchemy, pytest)
 ├── src/
