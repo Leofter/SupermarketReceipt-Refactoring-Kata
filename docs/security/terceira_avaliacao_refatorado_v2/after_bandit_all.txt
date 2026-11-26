@@ -1,4 +1,4 @@
-Run started:2026-11-24 21:43:00.543371+00:00
+Run started:2026-11-25 22:30:16.069613+00:00
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -287,21 +287,70 @@ Test results:
 51	    assert receipt_text == expected
 
 --------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: project/tests/test_sqlite_repositories.py:34:4
+33	
+34	    assert catalog.unit_price(escova) == pytest.approx(12.50)
+35	    assert catalog.find_by_name("escova") == escova
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: project/tests/test_sqlite_repositories.py:35:4
+34	    assert catalog.unit_price(escova) == pytest.approx(12.50)
+35	    assert catalog.find_by_name("escova") == escova
+36	    assert catalog.find_by_name("inexistente") is None
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: project/tests/test_sqlite_repositories.py:36:4
+35	    assert catalog.find_by_name("escova") == escova
+36	    assert catalog.find_by_name("inexistente") is None
+37	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: project/tests/test_sqlite_repositories.py:59:4
+58	    out = CheckoutUseCase(catalog, offer_gateway).execute(CheckoutInputDTO(cart))
+59	    assert out.total_discount == pytest.approx(2.50)
+60	    assert out.total_price == pytest.approx(32.50)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: project/tests/test_sqlite_repositories.py:60:4
+59	    assert out.total_discount == pytest.approx(2.50)
+60	    assert out.total_price == pytest.approx(32.50)
+
+--------------------------------------------------
 
 Code scanned:
-	Total lines of code: 973
+	Total lines of code: 1152
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 
 Run metrics:
 	Total issues (by severity):
 		Undefined: 0
-		Low: 29
+		Low: 34
 		Medium: 0
 		High: 0
 	Total issues (by confidence):
 		Undefined: 0
 		Low: 0
 		Medium: 0
-		High: 29
+		High: 34
 Files skipped (0):
