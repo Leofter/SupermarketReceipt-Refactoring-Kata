@@ -4,17 +4,15 @@ from enum import Enum
 from typing import Callable
 
 from src.aplication.service.strategies.bundle_for_amount_strategy import (
-    BundleForAmountStrategy
+    BundleForAmountStrategy,
 )
 from src.aplication.service.strategies.combo_discount_strategy import (
-    ComboDiscountStrategy
+    ComboDiscountStrategy,
 )
 from src.aplication.service.strategies.percentage_discount_strategy import (
-    PercentageDiscountStrategy
+    PercentageDiscountStrategy,
 )
-from src.aplication.service.strategies.three_for_two_strategy import (
-    ThreeForTwoStrategy
-)
+from src.aplication.service.strategies.three_for_two_strategy import ThreeForTwoStrategy
 from src.domain.entities.product import Product
 from src.domain.interfaces.discount_strategy import DiscountStrategy
 
@@ -46,8 +44,8 @@ class DiscountStrategyFactory:
             _require_single_product(products)
         ),
         OfferType.TEN_PERCENT_DISCOUNT: (
-            lambda products, arg: PercentageDiscountStrategy(
-                _require_single_product(products), arg
+            lambda products, _arg: PercentageDiscountStrategy(
+                _require_single_product(products), 10.0
             )
         ),
         OfferType.TWO_FOR_AMOUNT: lambda products, arg: BundleForAmountStrategy(
