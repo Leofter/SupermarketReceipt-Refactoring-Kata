@@ -40,3 +40,11 @@ class CatalogRepository(SupermarketCatalog):
         if row is None:
             return None
         return Product(row.name, ProductUnit[row.unit])
+
+    def list_products(self) -> tuple[tuple[Product, float], ...]:
+        """Retorna todos os produtos cadastrados e seus preços."""
+        rows = self._session.query(ProductModel).all()
+        return tuple(
+            (Product(row.name, ProductUnit[row.unit]), row.unit_price)
+            for row in rows
+        )
