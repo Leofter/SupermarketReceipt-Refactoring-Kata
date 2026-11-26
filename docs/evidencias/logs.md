@@ -1,4 +1,5 @@
 # git log
+## https://github.com/Leofter/SupermarketReceipt-Refactoring-Kata.git
 
 commit 35bac2142b8106d6d3d03af1698f87abfe0c24f4 (HEAD -> feature/interface-visual, origin/develop, develop)
 Author: LeoMagal <lmagal2003@gmail.com>

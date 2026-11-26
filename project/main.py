@@ -28,25 +28,32 @@ def main() -> None:
     toothbrush = Product("toothbrush", ProductUnit.EACH)
     apples = Product("apples", ProductUnit.KILO)
     toothpaste = Product("toothpaste", ProductUnit.EACH)
+    tomatoes = Product("cherry tomatoes", ProductUnit.EACH)
+    rice = Product("rice", ProductUnit.EACH)
 
     catalog.add_product(toothbrush, 0.99)
     catalog.add_product(apples, 1.99)
     catalog.add_product(toothpaste, 1.79)
+    catalog.add_product(tomatoes, 0.69)
+    catalog.add_product(rice, 2.49)
 
     if not offer_gateway.list_active_offers():
         offer_gateway.save_offer(OfferType.THREE_FOR_TWO, (toothbrush,))
-        offer_gateway.save_offer(
-            OfferType.COMBO_TEN_PERCENT, (toothbrush, toothpaste)
-        )
+        offer_gateway.save_offer(OfferType.TEN_PERCENT_DISCOUNT, (apples,))
+        offer_gateway.save_offer(OfferType.TWO_FOR_AMOUNT, (tomatoes,), 0.99)
+        offer_gateway.save_offer(OfferType.FIVE_FOR_AMOUNT, (rice,), 7.49)
+        offer_gateway.save_offer(OfferType.COMBO_TEN_PERCENT, (toothbrush, toothpaste))
 
     use_case = CheckoutUseCase(catalog=catalog, offer_gateway=offer_gateway)
     presenter = ReceiptPresenter()
     controller = CheckoutController(use_case=use_case, presenter=presenter)
 
     cart = ShoppingCart()
-    cart.add_item_quantity(toothbrush, 3)
+    cart.add_item_quantity(toothbrush, 4)
     cart.add_item_quantity(apples, 2.5)
     cart.add_item(toothpaste)
+    cart.add_item_quantity(tomatoes, 2)
+    cart.add_item_quantity(rice, 5)
 
     print(controller.checkout(cart), end="")
     session.close()
