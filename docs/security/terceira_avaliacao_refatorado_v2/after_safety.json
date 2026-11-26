@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "scan_type": "scan",
+    "stage": "development",
+    "scan_locations": [
+      "/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/project"
+    ],
+    "authenticated": true,
+    "authentication_method": "token",
+    "timestamp": "2026-11-25T19:33:47.301681",
+    "telemetry": {
+      "os_type": "Linux",
+      "os_release": "7.0.0-43-generic",
+      "os_description": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+      "python_version": "3.12.16",
+      "safety_command": "scan",
+      "safety_options": {
+        "target": {
+          "--target": 1
+        },
+        "output": {
+          "--output": 1
+        }
+      },
+      "safety_version": "3.8.1",
+      "safety_source": "cli"
+    },
+    "schema_version": "3.0"
+  },
+  "scan_results": {
+    "files": [],
+    "projects": [
+      {
+        "id": "supermarketreceipt-refactoring-kata",
+        "upload_request_id": null,
+        "location": "/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/project",
+        "policy": {
+          "id": "43a764ca-d19e-4b92-81d6-81f266120d0f",
+          "path": null,
+          "source": "cloud"
+        },
+        "git": {
+          "branch": "feature/reavaliacao_3",
+          "tag": "",
+          "commit": "8db0849895ba641eb07eeb6a6617211a3b7bdb45",
+          "dirty": true,
+          "origin": "https://github.com/Leofter/SupermarketReceipt-Refactoring-Kata.git"
+        },
+        "files": [
+          {
+            "location": "/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/project/requirements.txt",
+            "type": "requirements.txt",
+            "categories": [
+              "python"
+            ],
+            "results": {
+              "dependencies": [
+                {
+                  "name": "sqlalchemy",
+                  "specifications": [
+                    {
+                      "raw": "SQLAlchemy==2.1.9",
+                      "vulnerabilities": {
+                        "known_vulnerabilities": [],
+                        "remediation": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "pytest",
+                  "specifications": [
+                    {
+                      "raw": "pytest==9.2.0",
+                      "vulnerabilities": {
+                        "known_vulnerabilities": [],
+                        "remediation": null
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

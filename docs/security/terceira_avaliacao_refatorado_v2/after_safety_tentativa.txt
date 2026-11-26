@@ -1,0 +1,12 @@
+Comando executado: conda run -n supermarket-sec python -m safety auth status
+Data/Hora (UTC): 2026-11-25 22:29:54 UTC
+/home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/safety/auth/main.py:5: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose.errors import ExpiredTokenError
+/home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+[2026-11-25 19:29:57]: Safety 3.8.1
+Safety is not authenticated. Please run 'safety auth login' to log in or 'safety
+auth enroll' to enroll via MDM.
+
+Diagnostico: CLI nao autenticada no inicio desta rodada; login interativo solicitado ao usuario antes do scan final.
