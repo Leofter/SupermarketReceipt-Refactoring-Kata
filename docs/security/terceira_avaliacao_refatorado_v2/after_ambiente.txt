@@ -1,0 +1,15 @@
+Data/Hora (UTC): 2026-11-25 22:29:43 UTC
+Sistema Operacional: Linux bia.lenovo 7.0.0-43-generic #43~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Sat Oct 31 06:52:47 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+Shell: /bin/bash
+Branch Git: feature/reavaliacao_3
+Commit Git: 8db0849895ba641eb07eeb6a6617211a3b7bdb45
+Diretorio Raiz: /home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata
+Proxy HTTP/HTTPS: nenhum
+
+Versoes:
+Python 3.12.16
+pip 26.2.2 from /home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/pip (python 3.12)
+__main__.py 1.9.4
+  python version = 3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]
+pip-audit 2.10.1
+safety, version 3.8.1

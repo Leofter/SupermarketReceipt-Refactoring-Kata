@@ -11,3 +11,5 @@ build/
 .venv
 docs/gab**
 **/.approval_tests_temp**
+docs/leo
+.vscode

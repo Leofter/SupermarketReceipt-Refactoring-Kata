@@ -1,0 +1,26 @@
+/home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/safety/auth/main.py:5: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose.errors import ExpiredTokenError
+/home/beatriz/miniconda3/envs/supermarket-sec/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+Safety 3.8.1 scanning 
+/home/beatriz/Documents/arquivos_faculdade/SupermarketReceipt-Refactoring-Kata/p
+roject
+2026-11-24 20:20:56 UTC
+
+Account: bea, beatrizestevez29@gmail.com 
+Project: supermarketreceipt-refactoring-kata
+ Git branch: feature/security_test_reavaliacao
+ Environment: Stage.development
+ Scan policy: fetched from Safety Platform, ignoring any local Safety CLI policy
+files
+
+
+Tested 0 dependencies for security issues using policy fetched from Safety 
+Platform
+0 security issues found, 0 fixes suggested.
+0 fixes suggested, resolving 0 vulnerabilities.
+
+Project dashboard: 
+https://platform.safetycli.com/codebases/supermarketreceipt-refactoring-kata/fin
+dings?branch=feature/security_test_reavaliacao
