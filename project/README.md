@@ -6,17 +6,39 @@ Modernização incremental do sistema legado de supermercado (`python_pytest/`),
 
 ## 1. Ambiente e Dependências
 
-- **Linguagem:** Python `3.9+` (validado em Python `3.13.13`).
+- **Linguagem:** Python `3.11+` (validado em Python `3.12.13` e `3.13.13`; `SQLAlchemy==2.1.9` exige Python `3.11` ou superior).
 - **Dependências de produção:** `SQLAlchemy==2.1.9` (persistência SQLite via `sqlite3` padrão).
 - **Dependências de desenvolvimento/testes:**
   - `pytest==9.2.0` (execução dos testes automatizados)
   - `pytest-cov` (opcional, para relatório de cobertura)
   - `bandit`, `pip-audit` e `safety` (opcional, para auditorias de segurança)
 
-Instalação das dependências em um ambiente virtual:
+### Opção 1 — Ambiente virtual com `conda` (recomendado)
 ```bash
+cd project
+conda create -n supermarket-receipt python=3.12 -y
+conda activate supermarket-receipt
+pip install -r requirements.txt
+```
+
+### Opção 2 — Ambiente virtual com `venv`
+Certifique-se de que `python3 --version` retorna `3.11` ou superior (se o seu sistema tiver `3.9` por padrão, use `python3.12` no comando abaixo):
+
+**Linux / macOS:**
+```bash
+cd project
 python3 -m venv .venv
 source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**Windows (PowerShell):**
+```powershell
+cd project
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
